@@ -1,21 +1,28 @@
-from Preprocessor import *
+import os
+import cv2 as cv
+import numpy as np
 
-from src.feature_extractor import *
+from src.pre_processor import PreProcessor
 
-imgPath = ''
+images = []
+labels = []
 
-img = None
-# img = cv.imread(imgPath)
+data_path = "../data/"
 
-preprocess(img)
+for root, dirs, files in os.walk(data_path + "/"):
+    for filename in files:
+        # Ignore gitignore.
+        if filename[0] == '.':
+            continue
 
-features = extract_features(img)
+        print(filename)
 
-# for img in data set
-# Preprocess the image
-# Extract features img
-    # Segment img into lines
-    # Segment lines into words
-    # Extract different features into vector
+        # Read image in grayscale.
+        gray_img = cv.imread(data_path + "/" + filename, cv.IMREAD_GRAYSCALE)
 
-# Train the model on the extracted features
+        # Pre process image.
+        PreProcessor.pre_process(gray_img)
+
+        # break
+
+        # TODO get id of the writer.
