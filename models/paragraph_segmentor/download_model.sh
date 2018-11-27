@@ -1,0 +1,1 @@
+wget https://s3.us-east-2.amazonaws.com/gluon-ocr/models/paragraph_segmentation2.params
