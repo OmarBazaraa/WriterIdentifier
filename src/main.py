@@ -3,15 +3,17 @@ import cv2 as cv
 import numpy as np
 
 from src.pre_processor import PreProcessor
+from src.segmentation.line_segmentor import LineSegmentor
+from src.feature_extractor import FeatureExtractor
 
-images = []
+featuers = []
 labels = []
 
 data_path = "../data/"
 
 for root, dirs, files in os.walk(data_path + "/"):
     for filename in files:
-        # Ignore gitignore.
+        # Ignore gitignore file
         if filename[0] == '.':
             continue
 
@@ -21,7 +23,17 @@ for root, dirs, files in os.walk(data_path + "/"):
         gray_img = cv.imread(data_path + "/" + filename, cv.IMREAD_GRAYSCALE)
 
         # Pre process image.
-        PreProcessor.pre_process(gray_img)
+        gray_img, bin_img = PreProcessor.pre_process(gray_img)
+
+        # Line segment
+        (gray_lines, bin_lines) = LineSegmentor.segment(gray_img, bin_img)
+
+        # Extract features.
+        featuers.append(FeatureExtractor.extract_features(gray_img, bin_img))
+
+        # TODO Extract label.
+
+
 
         # break
 
