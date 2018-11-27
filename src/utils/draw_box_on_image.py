@@ -1,6 +1,12 @@
+'''
+Used from OCR using MXNet Gluon created by Jonathan Chung, as part of his internship as Applied Scientist @ Amazon AI,
+in collaboration with Thomas Delteil.
+'''
+
 import numpy as np
 from skimage.draw import line_aa
 import matplotlib.pyplot as plt
+
 
 def draw_line(image, y1, x1, y2, x2, line_type):
     rr, cc, val = line_aa(y1, x1, y2, x2)
@@ -9,7 +15,8 @@ def draw_line(image, y1, x1, y2, x2, line_type):
         cc = np.delete(cc, np.arange(0, cc.size, 5))
     image[rr, cc] = 0
     return image
-    
+
+
 def draw_box(bounding_box, image, line_type, is_xywh=True):
     image_h, image_w = image.shape[-2:]
     if is_xywh:
@@ -29,7 +36,7 @@ def draw_box(bounding_box, image, line_type, is_xywh=True):
     if y2 < 0:
         y2 = 0
     if x2 < 0:
-        x2 =0
+        x2 = 0
     if y1 < 0:
         y1 = 0
     if x1 < 0:
@@ -40,6 +47,7 @@ def draw_box(bounding_box, image, line_type, is_xywh=True):
     image = draw_line(image, y2, x2, y1, x2, line_type)
     image = draw_line(image, y1, x2, y1, x1, line_type)
     return image
+
 
 def draw_boxes_on_image(pred, label, images):
     ''' Function to draw multiple bounding boxes on the images. Predicted bounding boxes will be
@@ -81,6 +89,7 @@ def draw_boxes_on_image(pred, label, images):
             image = draw_box(label[i, k, :], image, line_type="solid")
         images[i, 0, :, :] = image
     return images
+
 
 def draw_box_on_image(pred, label, images):
     ''' Function to draw bounding boxes on the images. Predicted bounding boxes will be

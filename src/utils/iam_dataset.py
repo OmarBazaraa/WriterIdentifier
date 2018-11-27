@@ -1,3 +1,7 @@
+'''
+Used from OCR using MXNet Gluon created by Jonathan Chung, as part of his internship as Applied Scientist @ Amazon AI,
+in collaboration with Thomas Delteil.
+'''
 import os
 import tarfile
 import urllib
@@ -19,6 +23,7 @@ from mxnet import nd
 
 from utils.expand_bounding_box import expand_bounding_box
 
+
 def crop_image(image, bb):
     ''' Helper function to crop the image by the bounding box (in percentages)
     '''
@@ -30,6 +35,7 @@ def crop_image(image, bb):
     (x1, y1, x2, y2) = (x, y, x + w, y + h)
     (x1, y1, x2, y2) = (int(x1), int(y1), int(x2), int(y2))
     return image[y1:y2, x1:x2]
+
 
 def resize_image(image, desired_size):
     ''' Helper function to resize an image while keeping the aspect ratio.
@@ -53,25 +59,26 @@ def resize_image(image, desired_size):
     '''
     size = image.shape[:2]
     if size[0] > desired_size[0] or size[1] > desired_size[1]:
-        ratio_w = float(desired_size[0])/size[0]
-        ratio_h = float(desired_size[1])/size[1]
+        ratio_w = float(desired_size[0]) / size[0]
+        ratio_h = float(desired_size[1]) / size[1]
         ratio = min(ratio_w, ratio_h)
-        new_size = tuple([int(x*ratio) for x in size])
+        new_size = tuple([int(x * ratio) for x in size])
         image = cv2.resize(image, (new_size[1], new_size[0]))
         size = image.shape
-            
+
     delta_w = max(0, desired_size[1] - size[1])
     delta_h = max(0, desired_size[0] - size[0])
-    top, bottom = delta_h//2, delta_h-(delta_h//2)
-    left, right = delta_w//2, delta_w-(delta_w//2)
-            
+    top, bottom = delta_h // 2, delta_h - (delta_h // 2)
+    left, right = delta_w // 2, delta_w - (delta_w // 2)
+
     color = image[0][0]
     if color < 230:
         color = 230
     image = cv2.copyMakeBorder(image, top, bottom, left, right, cv2.BORDER_CONSTANT, value=float(color))
-    crop_bb = (left/image.shape[1], top/image.shape[0], (image.shape[1] - right - left)/image.shape[1],
-               (image.shape[0] - bottom - top)/image.shape[0])
+    crop_bb = (left / image.shape[1], top / image.shape[0], (image.shape[1] - right - left) / image.shape[1],
+               (image.shape[0] - bottom - top) / image.shape[0])
     return image, crop_bb
+
 
 def crop_handwriting_page(image, bb, image_size):
     '''
@@ -99,6 +106,7 @@ def crop_handwriting_page(image, bb, image_size):
 
     image, _ = resize_image(image, desired_size=image_size)
     return image
+
 
 class IAMDataset(dataset.ArrayDataset):
     """ The IAMDataset provides images of handwritten passages written by multiple
@@ -140,8 +148,9 @@ class IAMDataset(dataset.ArrayDataset):
     MAX_IMAGE_SIZE_FORM = (1120, 800)
     MAX_IMAGE_SIZE_LINE = (30, 400)
     MAX_IMAGE_SIZE_WORD = (30, 140)
+
     def __init__(self, parse_method, credentials=None,
-                 root=os.path.join(os.path.dirname(__file__), '..', 'dataset', 'iamdataset'), 
+                 root=os.path.join(os.path.dirname(__file__), '..', 'dataset', 'iamdataset'),
                  train=True, output_data="text",
                  output_parse_method=None,
                  output_form_text_as_array=False):
@@ -153,11 +162,14 @@ class IAMDataset(dataset.ArrayDataset):
         self._parse_method = parse_method
         url_partial = "http://www.fki.inf.unibe.ch/DBs/iamDB/data/{data_type}/{filename}.tgz"
         if self._parse_method == "form":
-            self._data_urls = [url_partial.format(data_type="forms", filename="forms" + a) for a in ["A-D", "E-H", "I-Z"]]
+            self._data_urls = [url_partial.format(data_type="forms", filename="forms" + a) for a in
+                               ["A-D", "E-H", "I-Z"]]
         elif self._parse_method == "form_bb":
-            self._data_urls = [url_partial.format(data_type="forms", filename="forms" + a) for a in ["A-D", "E-H", "I-Z"]]
+            self._data_urls = [url_partial.format(data_type="forms", filename="forms" + a) for a in
+                               ["A-D", "E-H", "I-Z"]]
         elif self._parse_method == "form_original":
-            self._data_urls = [url_partial.format(data_type="forms", filename="forms" + a) for a in ["A-D", "E-H", "I-Z"]]
+            self._data_urls = [url_partial.format(data_type="forms", filename="forms" + a) for a in
+                               ["A-D", "E-H", "I-Z"]]
         elif self._parse_method == "line":
             self._data_urls = [url_partial.format(data_type="lines", filename="lines")]
         elif self._parse_method == "word":
@@ -173,7 +185,7 @@ class IAMDataset(dataset.ArrayDataset):
                 assert False, "Please enter credentials for the IAM dataset in credentials.json or as arguments"
         else:
             self._credentials = credentials
-        
+
         self._train = train
 
         _output_data_types = ["text", "bb"]
@@ -193,13 +205,14 @@ class IAMDataset(dataset.ArrayDataset):
             self.image_data_file_name = os.path.join(root, "image_data-{}-{}-{}*.plk".format(
                 self._parse_method, self._output_data, self._output_parse_method))
         else:
-            self.image_data_file_name = os.path.join(root, "image_data-{}-{}*.plk".format(self._parse_method, self._output_data))
+            self.image_data_file_name = os.path.join(root, "image_data-{}-{}*.plk".format(self._parse_method,
+                                                                                          self._output_data))
 
         self._root = root
         if not os.path.isdir(root):
             os.makedirs(root)
         self._output_form_text_as_array = output_form_text_as_array
-        
+
         data = self._get_data()
         super(IAMDataset, self).__init__(data)
 
@@ -254,7 +267,7 @@ class IAMDataset(dataset.ArrayDataset):
         urllib.request.install_opener(opener)
         opener.open(url)
         filename = os.path.basename(url)
-        print("Downloading {}: ".format(filename)) 
+        print("Downloading {}: ".format(filename))
         urllib.request.urlretrieve(url, reporthook=self._reporthook,
                                    filename=os.path.join(self._root, filename))[0]
         sys.stdout.write("\n")
@@ -267,7 +280,7 @@ class IAMDataset(dataset.ArrayDataset):
         if not os.path.isfile(archive_file):
             self._download(self._xml_url)
             self._extract(archive_file, archive_type="tar", output_dir="xml")
-            
+
     def _download_data(self):
         ''' Helper function to download and extract the data of the IAM database
         '''
@@ -287,10 +300,10 @@ class IAMDataset(dataset.ArrayDataset):
             logging.info("Downloding subject list from {}".format(url))
             self._download(url)
             self._extract(archive_file, archive_type="zip", output_dir="subject")
-    
+
     def _pre_process_image(self, img_in):
         im = cv2.imread(img_in, cv2.IMREAD_GRAYSCALE)
-        if np.size(im) == 1: # skip if the image data is corrupt.
+        if np.size(im) == 1:  # skip if the image data is corrupt.
             return None
         # reduce the size of form images so that it can fit in memory.
         if self._parse_method in ["form", "form_bb"]:
@@ -300,7 +313,7 @@ class IAMDataset(dataset.ArrayDataset):
         if self._parse_method == "word":
             im, _ = resize_image(im, self.MAX_IMAGE_SIZE_WORD)
         img_arr = np.asarray(im)
-        return img_arr 
+        return img_arr
 
     def _get_bb_of_item(self, item, height, width):
         ''' Helper function to find the bounding box (bb) of an item in the xml file.
@@ -325,12 +338,12 @@ class IAMDataset(dataset.ArrayDataset):
         '''
 
         character_list = [a for a in item.iter("cmp")]
-        if len(character_list) == 0: # To account for some punctuations that have no words
+        if len(character_list) == 0:  # To account for some punctuations that have no words
             return None
         x1 = np.min([int(a.attrib['x']) for a in character_list])
         y1 = np.min([int(a.attrib['y']) for a in character_list])
         x2 = np.max([int(a.attrib['x']) + int(a.attrib['width']) for a in character_list])
-        y2 = np.max([int(a.attrib['y']) + int(a.attrib['height'])for a in character_list])
+        y2 = np.max([int(a.attrib['y']) + int(a.attrib['height']) for a in character_list])
 
         x1 = float(x1) / width
         x2 = float(x2) / width
@@ -338,7 +351,7 @@ class IAMDataset(dataset.ArrayDataset):
         y2 = float(y2) / height
         bb = [x1, y1, x2 - x1, y2 - y1]
         return bb
-    
+
     def _get_output_data(self, item, height, width):
         ''' Function to obtain the output data (both text and bounding boxes).
         Note that the bounding boxes are rescaled based on the rescale_ratio parameter.
@@ -373,13 +386,14 @@ class IAMDataset(dataset.ArrayDataset):
         else:
             for item_output in item.iter(self._output_parse_method):
                 bb = self._get_bb_of_item(item_output, height, width)
-                if bb == None: # Account for words with no letters
+                if bb == None:  # Account for words with no letters
                     continue
                 output_data.append(bb)
         output_data = np.array(output_data)
         return output_data
 
-    def _change_bb_reference(self, bb, relative_bb, bb_reference_size, relative_bb_reference_size, output_size, operator):
+    def _change_bb_reference(self, bb, relative_bb, bb_reference_size, relative_bb_reference_size, output_size,
+                             operator):
         ''' Helper function to convert bounding boxes relative into another bounding bounding box.
         Parameter
         --------
@@ -406,7 +420,7 @@ class IAMDataset(dataset.ArrayDataset):
         bb: [[int, int, int, int]]
             Bounding boxes (x, y, w, h) in percentages that are converted
         
-        '''        
+        '''
         (x1, y1, x2, y2) = (bb[:, 0], bb[:, 1], bb[:, 0] + bb[:, 2], bb[:, 1] + bb[:, 3])
         (x1, y1, x2, y2) = (x1 * bb_reference_size[1], y1 * bb_reference_size[0],
                             x2 * bb_reference_size[1], y2 * bb_reference_size[0])
@@ -436,29 +450,31 @@ class IAMDataset(dataset.ArrayDataset):
         expand_bb_scale = 0.05
         new_w = (1 + expand_bb_scale) * bb[2]
         new_h = (1 + expand_bb_scale) * bb[3]
-        
-        bb[0] = bb[0] - (new_w - bb[2])/2
-        bb[1] = bb[1] - (new_h - bb[3])/2
+
+        bb[0] = bb[0] - (new_w - bb[2]) / 2
+        bb[1] = bb[1] - (new_h - bb[3]) / 2
         bb[2] = new_w
         bb[3] = new_h
 
         image_arr_bb = crop_image(image_arr, bb)
 
-        if self._output_data == "bb":            
-            output_data = self._change_bb_reference(output_data, bb, image_arr.shape, image_arr.shape, image_arr_bb.shape, "minus")
+        if self._output_data == "bb":
+            output_data = self._change_bb_reference(output_data, bb, image_arr.shape, image_arr.shape,
+                                                    image_arr_bb.shape, "minus")
 
         image_arr_bb_, bb = resize_image(image_arr_bb, desired_size=(700, 700))
 
         if self._output_data == "bb":
-            output_data = self._change_bb_reference(output_data, bb, image_arr_bb.shape, image_arr_bb_.shape, image_arr_bb_.shape, "plus")
+            output_data = self._change_bb_reference(output_data, bb, image_arr_bb.shape, image_arr_bb_.shape,
+                                                    image_arr_bb_.shape, "plus")
         image_arr = image_arr_bb_
         return image_arr, output_data
-    
+
     def _save_dataframe_chunks(self, df, name):
         for i, df_split in enumerate(np.array_split(df, 4)):
-            filename = name[:-5] + str(i) + ".plk" # remove *.plk in the filename
+            filename = name[:-5] + str(i) + ".plk"  # remove *.plk in the filename
             df_split.to_pickle(filename, protocol=2)
-            
+
     def _load_dataframe_chunks(self, name):
         image_data_chunks = []
         for fn in sorted(glob.glob(name)):
@@ -505,8 +521,8 @@ class IAMDataset(dataset.ArrayDataset):
         self._save_dataframe_chunks(image_data, self.image_data_file_name)
         return image_data
 
-    def _process_subjects(self, train_subject_lists = ["trainset", "validationset1", "validationset2"],
-                          test_subject_lists = ["testset"]):
+    def _process_subjects(self, train_subject_lists=["trainset", "validationset1", "validationset2"],
+                          test_subject_lists=["testset"]):
         ''' Function to organise the list of subjects to training and testing.
         The IAM dataset provides 4 files: trainset, validationset1, validationset2, and testset each
         with a list of subjects.
@@ -533,17 +549,17 @@ class IAMDataset(dataset.ArrayDataset):
         train_subjects = []
         test_subjects = []
         for train_list in train_subject_lists:
-            subject_list = pd.read_csv(os.path.join(self._root, "subject", train_list+".txt"))
+            subject_list = pd.read_csv(os.path.join(self._root, "subject", train_list + ".txt"))
             train_subjects.append(subject_list.values)
         for test_list in test_subject_lists:
-            subject_list = pd.read_csv(os.path.join(self._root, "subject", test_list+".txt"))
+            subject_list = pd.read_csv(os.path.join(self._root, "subject", test_list + ".txt"))
             test_subjects.append(subject_list.values)
 
         train_subjects = np.concatenate(train_subjects)
         test_subjects = np.concatenate(test_subjects)
         if self._parse_method in ["form", "form_bb", "form_original"]:
-        # For the form method, the "subject names" do not match the ones provided
-        # in the file. This clause transforms the subject names to match the file.
+            # For the form method, the "subject names" do not match the ones provided
+            # in the file. This clause transforms the subject names to match the file.
             new_train_subjects = []
             for i in train_subjects:
                 form_subject_number = i[0].split("-")[0] + "-" + i[0].split("-")[1]
@@ -580,7 +596,7 @@ class IAMDataset(dataset.ArrayDataset):
             return new_subject_list
         else:
             return subject_list
-                
+
     def _get_data(self):
         ''' Function to get the data and to extract the data for training or testing
         

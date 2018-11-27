@@ -8,7 +8,7 @@ pip install -r requirements.txt
 # Download Pre-Trained Models
 Please download the pre-trained models by running this command found for every model in models directory.
 ```Console
-./download.sh
+sh download_model.sh
 ```
 
 # Database used

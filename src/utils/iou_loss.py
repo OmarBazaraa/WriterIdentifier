@@ -1,5 +1,11 @@
+'''
+Used from OCR using MXNet Gluon created by Jonathan Chung, as part of his internship as Applied Scientist @ Amazon AI,
+in collaboration with Thomas Delteil.
+'''
+
 from mxnet.gluon.loss import Loss
 from mxnet import gluon
+
 
 class IOU_loss(Loss):
     r"""Calculates the iou between `pred` and `label`.
@@ -29,7 +35,7 @@ class IOU_loss(Loss):
 
     def __init__(self, weight=1., batch_axis=0, **kwargs):
         super(IOU_loss, self).__init__(weight, batch_axis, **kwargs)
-        
+
     def hybrid_forward(self, F, pred, label, sample_weight=None):
         '''
         Interpreted from: https://www.pyimagesearch.com/2016/11/07/intersection-over-union-iou-for-object-detection/
@@ -40,7 +46,7 @@ class IOU_loss(Loss):
         3) If the bounding boxes do not overlap with one another, set the iou to zero
         4) Calculate the negative mean of the IOU
         '''
-        
+
         pred_area = pred[:, 2] * pred[:, 3]
         label_area = label[:, 2] * label[:, 3]
 
@@ -62,16 +68,16 @@ class IOU_loss(Loss):
         y1_2 = y1_2.expand_dims(0)
         x2_2 = x2_2.expand_dims(0)
         y2_2 = y2_2.expand_dims(0)
-        
+
         x_a = F.max(F.concat(x1_1, x1_2, dim=0), axis=0)
         y_a = F.max(F.concat(y1_1, y1_2, dim=0), axis=0)
         x_b = F.min(F.concat(x2_1, x2_2, dim=0), axis=0)
         y_b = F.min(F.concat(y2_1, y2_2, dim=0), axis=0)
-        
+
         inter_area = (x_b - x_a) * (y_b - y_a)
 
         iou = F.log(inter_area) - F.log(pred_area + label_area - inter_area)
-        
+
         loss = gluon.loss._apply_weighting(F, iou, self._weight, sample_weight)
         loss = F.where(F.logical_not(overlaps), F.zeros(shape=overlaps.shape), loss)
         mean_loss = F.mean(loss, axis=self._batch_axis, exclude=True)

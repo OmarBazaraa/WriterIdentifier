@@ -1,3 +1,8 @@
+'''
+Used from OCR using MXNet Gluon created by Jonathan Chung, as part of his internship as Applied Scientist @ Amazon AI,
+in collaboration with Thomas Delteil.
+'''
+
 import multiprocessing
 import time
 import random
