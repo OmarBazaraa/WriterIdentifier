@@ -1,8 +1,6 @@
-import numpy as np
-import cv2 as cv
-
 from Preprocessor import *
-from FeatureExtractor import *
+
+from src.feature_extractor import *
 
 imgPath = ''
 
