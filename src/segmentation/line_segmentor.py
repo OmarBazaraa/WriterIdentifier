@@ -3,4 +3,4 @@ class LineSegmentor:
     def segment(gray_img, bin_img):
         lines = []
 
-        return lines
+        return None, None
