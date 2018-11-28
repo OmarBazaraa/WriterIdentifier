@@ -3,3 +3,5 @@ numpy
 scikit-image
 matplotlib
 mxnet
+mxboard
+pandas

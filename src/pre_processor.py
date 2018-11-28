@@ -2,6 +2,9 @@ import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
 
+from src.segmentation.paragraph_segmentation_dcnn import make_cnn as ParagraphSegmentationNet
+from src.segmentation.paragraph_segmentation_dcnn import paragraph_segmentation_transform
+from src.utils.iam_dataset import IAMDataset, crop_handwriting_page
 from src.utils.utils import *
 
 
@@ -46,6 +49,7 @@ class PreProcessor:
         hor_hist = np.sum(edge_img, axis=1) / 255
         ver_hist = np.sum(edge_img, axis=0) / 255
 
+        '''
         # Threshold values.
         threshold_high = int(np.max(hor_hist) * 0.76)
         threshold_low = 10
@@ -106,5 +110,29 @@ class PreProcessor:
         # plt.plot([i for i in range(h)], freq)
         # plt.plot([upper_line, lower_line], [threshold_high, threshold_high])
         # plt.show()
+        '''
+
+        # Initialization for the model.
+        # Check if a gpu is available.
+        form_size = (1120, 800)
+        segmented_paragraph_size = (700, 700)  # FIXME to be changed I am just trying the model for now.
+        if gpu_device():
+            ctx = mx.gpu(0)
+        else:
+            ctx = mx.cpu()
+
+        # Create the paragraph segmentation using DCNN model.
+        paragraph_segmentation_net = ParagraphSegmentationNet(ctx)
+        paragraph_segmentation_net.load_parameters("../models/paragraph_segmentor/paragraph_segmentation2.params", ctx)
+
+        # Resize the image before feeding it to the model.
+        resized_image = paragraph_segmentation_transform(gray_img, image_size=form_size)
+        # Page bounding box.
+        paragraph_bb = paragraph_segmentation_net(resized_image.as_in_context(ctx))
+        # Crop the handwritten paragraph.
+        paragraph_segmented_image = crop_handwriting_page(gray_img, paragraph_bb[0].asnumpy(),
+                                                          image_size=segmented_paragraph_size)
+
+        display_image("Paragaph", paragraph_segmented_image, true)
 
         return gray_img, bin_img

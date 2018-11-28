@@ -1,6 +1,7 @@
 '''
 Used from OCR using MXNet Gluon created by Jonathan Chung, as part of his internship as Applied Scientist @ Amazon AI,
 in collaboration with Thomas Delteil.
+Link: github.com/ThomasDelteil/HandwrittenTextRecognition_MXNet/tree/dc126498e722539b5aec1c1218c6719b4c207aa5
 '''
 
 import numpy as np
