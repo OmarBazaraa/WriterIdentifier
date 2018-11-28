@@ -4,7 +4,7 @@ import mxnet as mx
 
 
 def display_image(name, img, wait=True):
-    h, w = img.shape
+    h, w = img.shape[0:2]
     cv.namedWindow(name, cv.WINDOW_NORMAL)
     cv.resizeWindow(name, w // 2, h // 2)
     cv.imshow(name, img)

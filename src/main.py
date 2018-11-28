@@ -34,7 +34,7 @@ for root, dirs, files in os.walk(data_path + "/"):
         gray_img, bin_img = PreProcessor.process(gray_img)
 
         # Line segment
-        gray_lines, bin_lines = LineSegmentor.segment(gray_img, bin_img)
+        # gray_lines, bin_lines = LineSegmentor.segment(gray_img, bin_img)
 
         # Extract features.
         features.append(FeatureExtractor.extract_features(gray_img, bin_img))

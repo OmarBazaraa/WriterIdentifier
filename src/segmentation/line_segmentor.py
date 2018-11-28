@@ -13,7 +13,11 @@ class LineSegmentor:
         h, w = gray_img.shape
 
         # Get horizontal histogram.
-        freq = np.sum(bin_img, axis=1) / 255
+        hor_hist = np.sum(bin_img, axis=1) / 255
+
+        mean = hor_hist.mean()
+        median = np.median(hor_hist)
+        half = np.max(hor_hist) / 2
 
         # Threshold values.
         threshold_val = 10  # Maximum number of black pixels in a row to consider it blank row
@@ -26,14 +30,14 @@ class LineSegmentor:
         i = 0
         while i < h:
             # Check if line is not empty
-            if freq[i] > threshold_val:
+            if hor_hist[i] > threshold_val:
                 i += 1
                 continue
 
             # Get contiguous blank (white) rows.
             j = min_idx = i
-            while j < h and freq[j] <= threshold_val:
-                if freq[j] < freq[min_idx]:
+            while j < h and hor_hist[j] <= threshold_val:
+                if hor_hist[j] < hor_hist[min_idx]:
                     min_idx = j
                 j += 1
 
@@ -48,12 +52,15 @@ class LineSegmentor:
         print(blank_rows)
 
         for r in blank_rows:
-            cv.line(bin_img, (0, r), (w, r), (255, 255, 0), 5)
+            cv.line(bin_img, (0, r), (w, r), 255, 2)
 
-        # display_image('Img', bin_img, False)
+        display_image('Img', bin_img, False)
 
-        # plt.figure()
-        # plt.plot(list(range(h)), freq)
-        # plt.show()
+        plt.figure()
+        plt.plot(list(range(h)), hor_hist)
+        plt.plot([0, h], [mean, mean], 'r')
+        plt.plot([0, h], [median, median], 'c')
+        plt.plot([0, h], [half, half], 'g')
+        plt.show()
 
         return None, None
