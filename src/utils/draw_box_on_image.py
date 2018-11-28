@@ -1,7 +1,7 @@
 '''
 Used from OCR using MXNet Gluon created by Jonathan Chung, as part of his internship as Applied Scientist @ Amazon AI,
 in collaboration with Thomas Delteil.
-Link: github.com/ThomasDelteil/HandwrittenTextRecognition_MXNet/tree/dc126498e722539b5aec1c1218c6719b4c207aa5
+Link: github.com/ThomasDelteil/HandwrittenTextRecognition_MXNet/
 '''
 
 import numpy as np
@@ -56,9 +56,9 @@ def draw_boxes_on_image(pred, label, images):
 
     Parameters
     ----------
-    
+
     pred: [n x [x, y, w, h]]
-        The predicted bounding boxes in percentages. 
+        The predicted bounding boxes in percentages.
         n is the number of bounding boxes predicted on an image
 
     label: [n x [x, y, w, h]]
@@ -98,7 +98,7 @@ def draw_box_on_image(pred, label, images):
 
     Parameters
     ----------
-    
+
     pred: [[x, y, w, h]]
         The predicted bounding boxes in percentages
 

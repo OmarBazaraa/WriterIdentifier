@@ -115,7 +115,8 @@ class PreProcessor:
         # Initialization for the model.
         # Check if a gpu is available.
         form_size = (1120, 800)
-        segmented_paragraph_size = (700, 700)  # FIXME to be changed I am just trying the model for now.
+        segmented_paragraph_size = (800, 800)
+
         if gpu_device():
             ctx = mx.gpu(0)
         else:
@@ -133,6 +134,6 @@ class PreProcessor:
         paragraph_segmented_image = crop_handwriting_page(gray_img, paragraph_bb[0].asnumpy(),
                                                           image_size=segmented_paragraph_size)
 
-        display_image("Paragaph", paragraph_segmented_image, true)
+        display_image("Paragaph", paragraph_segmented_image, True)
 
         return gray_img, bin_img

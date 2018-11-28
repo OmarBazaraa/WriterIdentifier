@@ -1,8 +1,9 @@
 '''
 Used from OCR using MXNet Gluon created by Jonathan Chung, as part of his internship as Applied Scientist @ Amazon AI,
 in collaboration with Thomas Delteil.
-Link: github.com/ThomasDelteil/HandwrittenTextRecognition_MXNet/tree/dc126498e722539b5aec1c1218c6719b4c207aa5
+Link: github.com/ThomasDelteil/HandwrittenTextRecognition_MXNet/
 '''
+
 import os
 import tarfile
 import urllib
@@ -42,7 +43,7 @@ def resize_image(image, desired_size):
     ''' Helper function to resize an image while keeping the aspect ratio.
     Parameter
     ---------
-    
+
     image: np.array
         The image to be resized.
 
@@ -78,6 +79,7 @@ def resize_image(image, desired_size):
     image = cv2.copyMakeBorder(image, top, bottom, left, right, cv2.BORDER_CONSTANT, value=float(color))
     crop_bb = (left / image.shape[1], top / image.shape[0], (image.shape[1] - right - left) / image.shape[1],
                (image.shape[0] - bottom - top) / image.shape[0])
+    image[image > 230] = 255
     return image, crop_bb
 
 
@@ -85,18 +87,18 @@ def crop_handwriting_page(image, bb, image_size):
     '''
     Given an image and bounding box (bb) crop the input image based on the bounding box.
     The final output image was scaled based on the image size.
-    
+
     Parameters
     ----------
     image: np.array
         Input form image
-    
+
     bb: (x, y, w, h)
         The bounding box in percentages to crop
-        
+
     image_size: (h, w)
         Image size to scale the output image to.
-        
+
     Returns
     -------
     output_image: np.array
@@ -122,11 +124,11 @@ class IAMDataset(dataset.ArrayDataset):
         To select the method of parsing the images of the passage
         Available options: [form, form_bb, line, word]
 
-    credentials: (str, str), Default None 
+    credentials: (str, str), Default None
         Your (username, password) for the IAM dataset. Register at
         http://www.fki.inf.unibe.ch/DBs/iamDB/iLogin/index.php
         By default, IAMDataset will read it from credentials.json
-    
+
     root: str, default: dataset/iamdataset
         Location to save the database
 
@@ -136,18 +138,18 @@ class IAMDataset(dataset.ArrayDataset):
     output_data_type: str, default text
         What type of data you want as an output: Text or bounding box.
         Available options are: [text, bb]
-     
+
     output_parse_method: str, default None
-        If the bounding box (bb) was selected as an output_data_type, 
+        If the bounding box (bb) was selected as an output_data_type,
         this parameter can select which bb you want to obtain.
         Available options: [form, line, word]
-        
+
     output_form_text_as_array: bool, default False
         When output_data is set to text and the parse method is set to form or form_original,
         if output_form_text_as_array is true, the output text will be a list of lines string
     """
     MAX_IMAGE_SIZE_FORM = (1120, 800)
-    MAX_IMAGE_SIZE_LINE = (30, 400)
+    MAX_IMAGE_SIZE_LINE = (60, 800)
     MAX_IMAGE_SIZE_WORD = (30, 140)
 
     def __init__(self, parse_method, credentials=None,
@@ -319,8 +321,8 @@ class IAMDataset(dataset.ArrayDataset):
     def _get_bb_of_item(self, item, height, width):
         ''' Helper function to find the bounding box (bb) of an item in the xml file.
         All the characters within the item are found and the left-most (min) and right-most (max + length)
-        are found. 
-        The bounding box emcompasses the left and right most characters in the x and y direction. 
+        are found.
+        The bounding box emcompasses the left and right most characters in the x and y direction.
 
         Parameter
         ---------
@@ -359,7 +361,7 @@ class IAMDataset(dataset.ArrayDataset):
 
         Parameter
         ---------
-        item: xml.etree 
+        item: xml.etree
             XML object for a word/line/form.
 
         height: int
@@ -402,7 +404,7 @@ class IAMDataset(dataset.ArrayDataset):
             Bounding boxes (x, y, w, h) in percentages to be converted.
 
         relative_bb: [int, int, int, int]
-            Reference bounding box (in percentages) to convert bb to 
+            Reference bounding box (in percentages) to convert bb to
 
         bb_reference_size: (int, int)
             Size (h, w) in pixels of the image containing bb
@@ -420,7 +422,7 @@ class IAMDataset(dataset.ArrayDataset):
         -------
         bb: [[int, int, int, int]]
             Bounding boxes (x, y, w, h) in percentages that are converted
-        
+
         '''
         (x1, y1, x2, y2) = (bb[:, 0], bb[:, 1], bb[:, 0] + bb[:, 2], bb[:, 1] + bb[:, 3])
         (x1, y1, x2, y2) = (x1 * bb_reference_size[1], y1 * bb_reference_size[0],
@@ -487,7 +489,7 @@ class IAMDataset(dataset.ArrayDataset):
     def _process_data(self):
         ''' Function that iterates through the downloaded xml file to gather the input images and the
         corresponding output.
-        
+
         Returns
         -------
         pd.DataFrame
@@ -527,10 +529,10 @@ class IAMDataset(dataset.ArrayDataset):
         ''' Function to organise the list of subjects to training and testing.
         The IAM dataset provides 4 files: trainset, validationset1, validationset2, and testset each
         with a list of subjects.
-        
+
         Parameters
         ----------
-        
+
         train_subject_lists: [str], default ["trainset", "validationset1", "validationset2"]
             The filenames of the list of subjects to be used for training the model
 
@@ -574,10 +576,10 @@ class IAMDataset(dataset.ArrayDataset):
 
     def _convert_subject_list(self, subject_list):
         ''' Function to convert the list of subjects for the "word" parse method
-        
+
         Parameters
         ----------
-        
+
         subject_lists: [str]
             A list of subjects
 
@@ -600,7 +602,7 @@ class IAMDataset(dataset.ArrayDataset):
 
     def _get_data(self):
         ''' Function to get the data and to extract the data for training or testing
-        
+
         Returns
         -------
 

@@ -1,7 +1,7 @@
 '''
 Used from OCR using MXNet Gluon created by Jonathan Chung, as part of his internship as Applied Scientist @ Amazon AI,
 in collaboration with Thomas Delteil.
-Link: github.com/ThomasDelteil/HandwrittenTextRecognition_MXNet/tree/dc126498e722539b5aec1c1218c6719b4c207aa5
+Link: github.com/ThomasDelteil/HandwrittenTextRecognition_MXNet/
 '''
 
 from mxnet.gluon.loss import Loss
@@ -14,7 +14,7 @@ class IOU_loss(Loss):
     Implementation based on:
         Yu, J., Jiang, Y., Wang, Z., Cao, Z., & Huang, T. (2016, October). Unitbox: An advanced object detection network.
             # In Proceedings of the 2016 ACM on Multimedia Conference (pp. 516-520). ACM.
-            
+
     Parameters
     ----------
     weight : float or None

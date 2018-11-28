@@ -1,10 +1,17 @@
+'''
+Used from OCR using MXNet Gluon created by Jonathan Chung, as part of his internship as Applied Scientist @ Amazon AI,
+in collaboration with Thomas Delteil.
+Link: github.com/ThomasDelteil/HandwrittenTextRecognition_MXNet/
+'''
+
+
 def expand_bounding_box(bb, expand_bb_scale_x=0.05, expand_bb_scale_y=0.05):
     (x, y, w, h) = bb
     new_w = (1 + expand_bb_scale_x) * w
     new_h = (1 + expand_bb_scale_y) * h
-        
-    x = x - (new_w - w)/2
-    y = y - (new_h - h)/2
+
+    x = x - (new_w - w) / 2
+    y = y - (new_h - h) / 2
     w = new_w
     h = new_h
     return (x, y, w, h)

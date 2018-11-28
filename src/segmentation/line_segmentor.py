@@ -50,10 +50,10 @@ class LineSegmentor:
         for r in blank_rows:
             cv.line(bin_img, (0, r), (w, r), (255, 255, 0), 5)
 
-        display_image('Img', bin_img, False)
+        # display_image('Img', bin_img, False)
 
-        plt.figure()
-        plt.plot(list(range(h)), freq)
-        plt.show()
+        # plt.figure()
+        # plt.plot(list(range(h)), freq)
+        # plt.show()
 
         return None, None
