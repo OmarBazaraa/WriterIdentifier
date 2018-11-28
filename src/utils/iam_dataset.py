@@ -34,7 +34,7 @@ def crop_image(image, bb):
     y = y * image.shape[0]
     w = w * image.shape[1]
     h = h * image.shape[0]
-    (x1, y1, x2, y2) = (x, y, x + w, y + h)
+    (x1, y1, x2, y2) = (0, y, image.shape[1], y + h)
     (x1, y1, x2, y2) = (int(x1), int(y1), int(x2), int(y2))
     return image[y1:y2, x1:x2]
 

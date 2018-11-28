@@ -130,6 +130,10 @@ class PreProcessor:
         resized_image = paragraph_segmentation_transform(gray_img, image_size=form_size)
         # Page bounding box.
         paragraph_bb = paragraph_segmentation_net(resized_image.as_in_context(ctx))
+
+        # Make the bounding box take the full image width
+        print(paragraph_bb.shape, paragraph_bb)
+
         # Crop the handwritten paragraph.
         paragraph_segmented_image = crop_handwriting_page(gray_img, paragraph_bb[0].asnumpy(),
                                                           image_size=segmented_paragraph_size)
