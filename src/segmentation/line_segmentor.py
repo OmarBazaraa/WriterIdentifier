@@ -12,10 +12,10 @@ class LineSegmentor:
         height, width = gray_img.shape
 
         # Get horizontal histogram.
-        hor_hist = np.sum(bin_img, axis=1) / 255
+        hor_hist = np.sum(bin_img, axis=1) // 255
 
         # Get line density threshold.
-        threshold = int(np.max(hor_hist) / 2)
+        threshold = int(np.max(hor_hist) // 3)
 
         # Detect peak rows.
         peaks = []
@@ -28,11 +28,7 @@ class LineSegmentor:
 
             # Get peak row.
             j = max_idx = i
-            while j < len(hor_hist) and (
-                    hor_hist[j] >= threshold or
-                    hor_hist[j - 1] >= threshold or
-                    hor_hist[j + 1] >= threshold
-            ):
+            while j < len(hor_hist) and LineSegmentor._is_probable_line(hor_hist, j, threshold):
                 if hor_hist[j] > hor_hist[max_idx]:
                     max_idx = j
                 j += 1
@@ -65,7 +61,7 @@ class LineSegmentor:
         valleys.append(len(hor_hist) - 1)
 
         # Detect line boundaries.
-        lines = []
+        lines_boundaries = []
         i = 1
         while i < len(valleys):
             u = valleys[i - 1]
@@ -85,7 +81,7 @@ class LineSegmentor:
             while r > l and ver_hist[r] == 0:
                 r -= 1
 
-            lines.append((l, u, r, d))
+            lines_boundaries.append((l, u, r, d))
 
             i += 1
 
@@ -96,7 +92,7 @@ class LineSegmentor:
             # Draw bounding box around lines.
             img = cv.cvtColor(gray_img, cv.COLOR_GRAY2BGR)
 
-            for l, u, r, d in lines:
+            for l, u, r, d in lines_boundaries:
                 cv.rectangle(img, (l, u), (r, d), (0, 0, 255), 2)
 
             display_image('Binary Paragraph', img, False)
@@ -111,12 +107,32 @@ class LineSegmentor:
             # Draw peaks.
             for r in peaks:
                 plt.plot(r, hor_hist[r], 'ro')
-                plt.plot([r, r + avg_dis], [hor_hist[r], hor_hist[r]], 'r')
+                plt.plot([r - avg_dis / 2, r + avg_dis / 2], [hor_hist[r], hor_hist[r]], 'r')
 
             # Draw valleys.
             for r in valleys:
                 plt.plot(r, hor_hist[r], 'bs')
 
-            plt.show()
+            plt.draw()
+            plt.waitforbuttonpress(0)
+            plt.close()
+            cv.destroyAllWindows()
 
+        # Return list of separated lines.
+        return LineSegmentor._crop_lines(gray_img, bin_img, lines_boundaries)
+
+    @staticmethod
+    def _is_probable_line(hor_hist, row, threshold):
+        width = 15
+
+        for i in range(-width, width):
+            if row + i < 0 or row + i >= len(hor_hist):
+                continue
+            if hor_hist[row + i] >= threshold:
+                return True
+
+        return False
+
+    @staticmethod
+    def _crop_lines(gray_img, bin_img, lines_boundaries):
         return None, None
