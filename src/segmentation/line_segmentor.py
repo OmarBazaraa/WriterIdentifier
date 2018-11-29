@@ -120,15 +120,26 @@ class LineSegmentor:
 
     @staticmethod
     def _detect_missing_peaks_valleys(hor_hist, peaks, valleys, avg_line_dist):
-        i = 1
+        avg_slope = 0
 
+        i = 1
+        while i < len(valleys):
+            d = valleys[i]
+            u = valleys[i - 1]
+            avg_slope += LineSegmentor._calc_range_slope(hor_hist, u, d)
+            i += 1
+
+        avg_slope = avg_slope // (len(valleys) - 1)
+        avg_slope //= 4
+
+        i = 1
         while i < len(valleys):
             dis = valleys[i] - valleys[i - 1]
 
             if dis > 1.8 * avg_line_dist:
                 d = valleys[i]
                 u = d - avg_line_dist
-                p = LineSegmentor._detect_peak_in_range(hor_hist, u, d, 20)
+                p = LineSegmentor._detect_peak_in_range(hor_hist, u, d, avg_slope)
 
                 if p != -1:
                     peaks.append(p)
@@ -164,6 +175,7 @@ class LineSegmentor:
             i += 1
 
         # print('Max diff', max_der - min_der)
+        # print('Threshold', threshold)
 
         # plt.figure()
         # plt.plot(list(range(len(derivative))), derivative)
@@ -215,6 +227,21 @@ class LineSegmentor:
         return height / len(lines_boundaries)
 
     @staticmethod
+    def _calc_range_slope(hor_hist, up, down):
+        max_der, min_der = -1e9, 1e9
+
+        range_len = down - up + 1
+
+        i = 1
+        while i < range_len:
+            val = hor_hist[up + i] - hor_hist[up + i - 1]
+            max_der = max(max_der, val)
+            min_der = min(min_der, val)
+            i += 1
+
+        return max_der - min_der
+
+    @staticmethod
     def _is_probable_line(hor_hist, row, threshold):
         width = 15
 
@@ -228,4 +255,5 @@ class LineSegmentor:
 
     @staticmethod
     def _crop_lines(gray_img, bin_img, lines_boundaries):
+
         return None, None
