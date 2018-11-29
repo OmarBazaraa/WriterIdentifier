@@ -26,6 +26,18 @@ from mxnet import nd
 from src.utils.expand_bounding_box import expand_bounding_box
 
 
+def get_writer_id(filename):
+    """
+    Given a file names, find te file's writer id.
+    :return: writer_id
+    """
+    tree = ET.parse("../data/raw/xml/" + filename + ".xml")
+    root = tree.getroot()
+    writer_id = int(root.attrib["writer-id"])
+    return writer_id
+
+
+# TODO remove if not eventually used.
 def crop_image(image, bb):
     ''' Helper function to crop the image by the bounding box (in percentages)
     '''
@@ -36,7 +48,7 @@ def crop_image(image, bb):
     h = h * image.shape[0]
     (x1, y1, x2, y2) = (0, y, image.shape[1], y + h)
     (x1, y1, x2, y2) = (int(x1), int(y1), int(x2), int(y2))
-    return image[y1-10:y2, x1:x2]
+    return image[y1 - 10:y2, x1:x2]
 
 
 def resize_image(image, desired_size):

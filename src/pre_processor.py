@@ -4,10 +4,6 @@ import matplotlib.pyplot as plt
 
 # from skimage.filters import threshold_sauvola
 
-# from src.segmentation.paragraph_segmentation_dcnn import make_cnn as ParagraphSegmentationNet
-# from src.segmentation.paragraph_segmentation_dcnn import paragraph_segmentation_transform
-# from src.utils.iam_dataset import IAMDataset, crop_handwriting_page
-
 from src.utils.utils import *
 
 

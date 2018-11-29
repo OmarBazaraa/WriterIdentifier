@@ -1,12 +1,11 @@
 import os
-import cv2 as cv
-import numpy as np
 import time
 
+from src.features.feature_extractor import FeatureExtractor
 from src.pre_processor import PreProcessor
 from src.segmentation.line_segmentor import LineSegmentor
-from src.feature_extractor import FeatureExtractor
 from src.utils.utils import *
+from src.data.iam_dataset import get_writer_id
 
 # Get start running time
 start_time = time.time()
@@ -16,7 +15,7 @@ features = []
 labels = []
 
 # Data set path
-data_path = "../data/"
+data_path = "../data/raw/form"
 
 # Walk on data set directory
 for root, dirs, files in os.walk(data_path + "/"):
@@ -44,6 +43,12 @@ for root, dirs, files in os.walk(data_path + "/"):
         features.append(FeatureExtractor.extract_features(gray_img, bin_img))
 
         # TODO Extract label (i.e. writer id).
+        labels.append(get_writer_id(filename[:-4]))
+
+        # Pass features and labels to a model for training.
+
+    # Break in order not to enter other dirs in the data/raw/form folder
+    break
 
 # Get finish running time
 finish_time = time.time()
