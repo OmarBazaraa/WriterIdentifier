@@ -2,7 +2,7 @@ import cv2 as cv
 import numpy as np
 
 DEBUG_PARAGRAPH_SEGMENTATION = False
-DEBUG_LINE_SEGMENTATION = False
+DEBUG_LINE_SEGMENTATION = True
 
 
 def display_image(name, img, wait=True):

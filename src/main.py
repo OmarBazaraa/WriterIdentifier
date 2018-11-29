@@ -5,8 +5,8 @@ from src.features.feature_extractor import FeatureExtractor
 from src.pre_processor import PreProcessor
 from src.segmentation.line_segmentor import LineSegmentor
 from src.utils.utils import *
-from src.data.iam_dataset import get_writer_id
-from src.models.train_model import *
+# from src.data.iam_dataset import get_writer_id
+# from src.models.train_model import *
 
 # Get start running time
 start_time = time.time()
@@ -41,14 +41,14 @@ for root, dirs, files in os.walk(data_path + "/"):
         gray_lines, bin_lines = LineSegmentor.segment(gray_img, bin_img)
 
         # Extract features.
-        features.append(FeatureExtractor.extract_features(gray_img, bin_img, gray_lines, bin_lines))
+        # features.append(FeatureExtractor.extract_features(gray_img, bin_img, gray_lines, bin_lines))
 
         # Extract label (i.e. writer id).
-        labels.append(get_writer_id(filename[:-4]))
+        # labels.append(get_writer_id(filename[:-4]))
 
         # Pass features and labels to a model for training.
-        classifier = SVMClassifier()
-        classifier.train(features, labels)
+        # classifier = SVMClassifier()
+        # classifier.train(features, labels)
 
         # TODO Predict a feature vector.
 
