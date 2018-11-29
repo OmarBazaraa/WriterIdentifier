@@ -6,7 +6,6 @@ from src.utils.utils import *
 
 
 class LineSegmentor:
-
     @staticmethod
     def segment(gray_img, bin_img):
         # Get image dimensions.
@@ -93,31 +92,31 @@ class LineSegmentor:
         #
         # Illustrate line segmentation.
         #
+        if DEBUG_LINE_SEGMENTATION:
+            # Draw bounding box around lines.
+            img = cv.cvtColor(gray_img, cv.COLOR_GRAY2BGR)
 
-        # Draw bounding box around lines.
-        img = cv.cvtColor(gray_img, cv.COLOR_GRAY2BGR)
+            for l, u, r, d in lines:
+                cv.rectangle(img, (l, u), (r, d), (0, 0, 255), 2)
 
-        for l, u, r, d in lines:
-            cv.rectangle(img, (l, u), (r, d), (0, 0, 255), 2)
+            display_image('Binary Paragraph', img, False)
 
-        display_image('Binary Paragraph', img, False)
+            # Draw histogram
+            plt.figure()
+            plt.xlabel('Row index')
+            plt.ylabel('Number of black pixels')
+            plt.plot(list(range(len(hor_hist))), hor_hist)
+            plt.plot([0, len(hor_hist)], [threshold, threshold], 'g--')
 
-        # Draw histogram
-        plt.figure()
-        plt.xlabel('Row index')
-        plt.ylabel('Number of black pixels')
-        plt.plot(list(range(len(hor_hist))), hor_hist)
-        plt.plot([0, len(hor_hist)], [threshold, threshold], 'g--')
+            # Draw peaks.
+            for r in peaks:
+                plt.plot(r, hor_hist[r], 'ro')
+                plt.plot([r, r + avg_dis], [hor_hist[r], hor_hist[r]], 'r')
 
-        # Draw peaks.
-        for r in peaks:
-            plt.plot(r, hor_hist[r], 'ro')
-            plt.plot([r, r + avg_dis], [hor_hist[r], hor_hist[r]], 'r')
+            # Draw valleys.
+            for r in valleys:
+                plt.plot(r, hor_hist[r], 'bs')
 
-        # Draw valleys.
-        for r in valleys:
-            plt.plot(r, hor_hist[r], 'bs')
-
-        plt.show()
+            plt.show()
 
         return None, None

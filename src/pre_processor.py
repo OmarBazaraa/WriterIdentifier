@@ -13,7 +13,7 @@ from src.utils.utils import *
 
 class PreProcessor:
     @staticmethod
-    def process(gray_img):
+    def process(gray_img, filename):
         # Reduce image noise.
         gray_img = cv.GaussianBlur(gray_img, (5, 5), 0)
 
@@ -29,13 +29,13 @@ class PreProcessor:
         thresh, bin_img = cv.threshold(gray_img, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU)
 
         # Crop page header and footer and keep only the handwritten area.
-        gray_img, bin_img = PreProcessor._crop_paragraph(gray_img, bin_img)
+        gray_img, bin_img = PreProcessor._crop_paragraph(gray_img, bin_img, filename)
 
         # Return pre processed images.
         return gray_img, bin_img
 
     @staticmethod
-    def _crop_paragraph(gray_img, bin_img):
+    def _crop_paragraph(gray_img, bin_img, filename):
         # Get image dimensions.
         height, width = gray_img.shape
 
@@ -85,14 +85,17 @@ class PreProcessor:
         right += padding
         down += padding
 
-        # Display bounding box on the handwritten paragraph
-        img = cv.cvtColor(gray_img, cv.COLOR_GRAY2BGR)
-        cv.rectangle(img, (left, up), (right, down), (0, 0, 255), 3)
-        display_image('Image', img)
-
         # Crop images.
         gray_img = gray_img[up:down + 1, left:right + 1]
         bin_img = bin_img[up:down + 1, left:right + 1]
+
+        if DEBUG_PARAGRAPH_SEGMENTATION:
+            # Display bounding box on the handwritten paragraph
+            img = cv.cvtColor(gray_img, cv.COLOR_GRAY2BGR)
+            cv.rectangle(img, (left, up), (right, down), (0, 0, 255), 3)
+            display_image('Image', img)
+
+            cv.imwrite("../data/output/" + filename, gray_img)
 
         # Return the handwritten paragraph
         return gray_img, bin_img
@@ -177,35 +180,3 @@ class PreProcessor:
         # plt.show()
 
         return gray_img, bin_img
-
-    # @staticmethod
-    # def _crop_ml(gray_img, bin_img):
-    #     # Initialization for the model.
-    #     # Check if a gpu is available.
-    #     form_size = (1120, 800)
-    #     segmented_paragraph_size = (800, 800)
-    #
-    #     if gpu_device():
-    #         ctx = mx.gpu(0)
-    #     else:
-    #         ctx = mx.cpu()
-    #
-    #     # Create the paragraph segmentation using DCNN model.
-    #     paragraph_segmentation_net = ParagraphSegmentationNet(ctx)
-    #     paragraph_segmentation_net.load_parameters("../models/paragraph_segmentor/paragraph_segmentation2.params", ctx)
-    #
-    #     # Resize the image before feeding it to the model.
-    #     resized_image = paragraph_segmentation_transform(gray_img, image_size=form_size)
-    #     # Page bounding box.
-    #     paragraph_bb = paragraph_segmentation_net(resized_image.as_in_context(ctx))
-    #
-    #     # Make the bounding box take the full image width
-    #     print(paragraph_bb.shape, paragraph_bb)
-    #
-    #     # Crop the handwritten paragraph.
-    #     paragraph_segmented_image = crop_handwriting_page(gray_img, paragraph_bb[0].asnumpy(),
-    #                                                       image_size=segmented_paragraph_size)
-    #
-    #     display_image("Paragaph", paragraph_segmented_image, True)
-    #
-    #     return gray_img, bin_img

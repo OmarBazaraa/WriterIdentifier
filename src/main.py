@@ -35,7 +35,7 @@ for root, dirs, files in os.walk(data_path + "/"):
         gray_img = cv.imread(data_path + "/" + filename, cv.IMREAD_GRAYSCALE)
 
         # Pre process image.
-        gray_img, bin_img = PreProcessor.process(gray_img)
+        gray_img, bin_img = PreProcessor.process(gray_img, filename)
 
         # Line segment
         gray_lines, bin_lines = LineSegmentor.segment(gray_img, bin_img)

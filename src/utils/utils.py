@@ -2,6 +2,8 @@ import cv2 as cv
 import numpy as np
 import mxnet as mx
 
+DEBUG_PARAGRAPH_SEGMENTATION = False
+DEBUG_LINE_SEGMENTATION = False
 
 def display_image(name, img, wait=True):
     h, w = img.shape[0:2]
