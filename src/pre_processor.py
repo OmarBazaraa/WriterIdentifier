@@ -7,7 +7,18 @@ from src.utils.utils import *
 
 class PreProcessor:
     @staticmethod
-    def process(gray_img, filename):
+    def process(gray_img, filename='img.png'):
+        """
+        Pre-processes the IAM form image and extracts the handwritten paragraph only.
+
+        :param gray_img:    the IAM form image to be processed.
+        :type gray_img:     np.ndarray
+        :param filename:    the filename of the image (needed only in debugging mode).
+        :type filename:     str
+        :return:            pre-processed gray and binary images of the handwritten paragraph.
+        :rtype:             (np.ndarray, np.ndarray)
+        """
+
         # Reduce image noise.
         gray_img = cv.GaussianBlur(gray_img, (5, 5), 0)
 
@@ -27,6 +38,20 @@ class PreProcessor:
 
     @staticmethod
     def _crop_paragraph(gray_img, bin_img, filename='img.png'):
+        """
+        Detects the bounding box of the handwritten paragraph of the given IAM form image
+        and returns a cropped image of it.
+
+        :param gray_img:    the IAM form image to be processed.
+        :type gray_img:     np.ndarray
+        :param bin_img:     binarized IAM form image to be processed.
+        :type bin_img:      np.ndarray
+        :param filename:    the filename of the image (needed only in debugging mode).
+        :type filename:     str
+        :return:            cropped gray and binary images of the handwritten paragraph.
+        :rtype:             (np.ndarray, np.ndarray)
+        """
+
         # Get image dimensions.
         height, width = gray_img.shape
 
