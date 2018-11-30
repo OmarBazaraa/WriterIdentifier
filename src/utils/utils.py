@@ -5,7 +5,7 @@ DEBUG_PARAGRAPH_SEGMENTATION = False
 DEBUG_LINE_SEGMENTATION = True
 
 
-def display_image(name, img, wait=True):
+def display_image(name: str, img: np.ndarray, wait: bool = True) -> None:
     """
     Displays the given image in a new window
     and waits for a user keyboard input to close the window and return.
@@ -13,11 +13,8 @@ def display_image(name, img, wait=True):
     To just display the image and return immediately, pass wait=False.
 
     :param name:    the name of the image to be displayed on the window.
-    :type name:     str
     :param img:     the image to display.
-    :type img:      np.ndarray
     :param wait:    whether to wait for any key to close the image or not (defaults to true).
-    :type wait:     bool
     :return:        nothing.
     """
 

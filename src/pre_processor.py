@@ -7,16 +7,13 @@ from src.utils.utils import *
 
 class PreProcessor:
     @staticmethod
-    def process(gray_img, filename='img.png'):
+    def process(gray_img: np.ndarray, filename: str = 'img.png') -> (np.ndarray, np.ndarray):
         """
         Pre-processes the IAM form image and extracts the handwritten paragraph only.
 
         :param gray_img:    the IAM form image to be processed.
-        :type gray_img:     np.ndarray
         :param filename:    the filename of the image (needed only in debugging mode).
-        :type filename:     str
         :return:            pre-processed gray and binary images of the handwritten paragraph.
-        :rtype:             (np.ndarray, np.ndarray)
         """
 
         # Reduce image noise.
@@ -37,19 +34,16 @@ class PreProcessor:
         return gray_img, bin_img
 
     @staticmethod
-    def _crop_paragraph(gray_img, bin_img, filename='img.png'):
+    def _crop_paragraph(gray_img: np.ndarray, bin_img: np.ndarray, filename: str = 'img.png') -> \
+            (np.ndarray, np.ndarray):
         """
         Detects the bounding box of the handwritten paragraph of the given IAM form image
         and returns a cropped image of it.
 
         :param gray_img:    the IAM form image to be processed.
-        :type gray_img:     np.ndarray
         :param bin_img:     binarized IAM form image to be processed.
-        :type bin_img:      np.ndarray
         :param filename:    the filename of the image (needed only in debugging mode).
-        :type filename:     str
         :return:            cropped gray and binary images of the handwritten paragraph.
-        :rtype:             (np.ndarray, np.ndarray)
         """
 
         # Get image dimensions.
