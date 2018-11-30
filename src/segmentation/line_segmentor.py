@@ -6,254 +6,273 @@ from src.utils.utils import *
 
 
 class LineSegmentor:
-    @staticmethod
-    def segment(gray_img, bin_img):
+
+    def __init__(self, gray_img, bin_img):
+        # Store references to the page images.
+        self.gray_img = gray_img
+        self.bin_img = bin_img
+
         # Get horizontal histogram.
-        hor_hist = np.sum(bin_img, axis=1, dtype=int) // 255
+        self.hor_hist = np.sum(bin_img, axis=1, dtype=int) // 255
 
         # Get line density threshold.
-        threshold = int(np.max(hor_hist) // 3)
+        self.threshold = int(np.max(self.hor_hist) // 3)
+        self.threshold_low = 25
 
-        # Detect peaks and valleys.
-        peaks = LineSegmentor._detect_peaks(hor_hist, threshold)
-        valleys = LineSegmentor._detect_valleys(hor_hist, peaks)
+        # Initialize empty lists.
+        self.peaks = []
+        self.valleys = []
+        self.lines_boundaries = []
 
-        # Calculate average distance between peaks.
-        avg_dis = int((peaks[-1] - peaks[0]) // len(peaks))
+        # Calculate peaks and valleys of the page.
+        self.detect_peaks()
+        self.avg_peaks_dist = int((self.peaks[-1] - self.peaks[0]) // len(self.peaks))
+        self.detect_valleys()
+        # self.avg_line_slope = self.calc_average_line_solve()
 
         # Detect missing peaks and valleys in a second iteration.
-        peaks, valleys = LineSegmentor._detect_missing_peaks_valleys(hor_hist, peaks, valleys, avg_dis)
+        self.detect_missing_peaks_valleys()
 
         # Detect line boundaries.
-        lines_boundaries = LineSegmentor._detect_line_boundaries(bin_img, hor_hist, valleys)
+        self.detect_line_boundaries()
 
-        #
+    def segment(self):
         # Illustrate line segmentation.
-        #
-        if DEBUG_LINE_SEGMENTATION:
-            # Draw bounding box around lines.
-            img = cv.cvtColor(gray_img, cv.COLOR_GRAY2BGR)
+        self.display_segmentation()
 
-            for l, u, r, d in lines_boundaries:
-                cv.rectangle(img, (l, u), (r, d), (0, 0, 255), 2)
+        # Initialize lines lists.
+        gray_lines, bin_lines = [], []
 
-            display_image('Line Segmented Paragraph', img, False)
+        # Loop on every line boundary.
+        for l, u, r, d in self.lines_boundaries:
+            # Crop gray line.
+            g_line = self.gray_img[u:d + 1, l:r + 1]
+            gray_lines.append(g_line)
 
-            # Draw histogram
-            plt.figure()
-            plt.xlabel('Row index')
-            plt.ylabel('Number of black pixels')
-            plt.plot(list(range(len(hor_hist))), hor_hist)
-            plt.plot([0, len(hor_hist)], [threshold, threshold], 'g--')
-
-            # Draw peaks.
-            for r in peaks:
-                plt.plot(r, hor_hist[r], 'ro')
-                plt.plot([r - avg_dis / 2, r + avg_dis / 2], [hor_hist[r], hor_hist[r]], 'r')
-
-            # Draw valleys.
-            for r in valleys:
-                plt.plot(r, hor_hist[r], 'bs')
-
-            # Draw probable missing valleys
-            # i = 1
-            # while i < len(valleys):
-            #     dis = valleys[i] - valleys[i - 1]
-            #
-            #     if dis > 1.8 * avg_dis:
-            #         r = valleys[i]
-            #         plt.plot(r - avg_dis, hor_hist[r], 'gs')
-            #
-            #     i += 1
-
-            plt.draw()
-            plt.waitforbuttonpress(0)
-            plt.close()
-            cv.destroyAllWindows()
+            # Crop binary line.
+            b_line = self.bin_img[u:d + 1, l:r + 1]
+            bin_lines.append(b_line)
 
         # Return list of separated lines.
-        return LineSegmentor._crop_lines(gray_img, bin_img, lines_boundaries)
+        return gray_lines, bin_lines
 
-    @staticmethod
-    def _detect_peaks(hor_hist, threshold):
-        peaks = []
+    def detect_peaks(self):
+        self.peaks = []
 
         i = 0
-        while i < len(hor_hist):
-            # Check if row is empty.
-            if hor_hist[i] < threshold:
+        while i < len(self.hor_hist):
+            # If the black pixels density of the row is below than threshold
+            # then continue to the next row.
+            if self.hor_hist[i] < self.threshold:
                 i += 1
                 continue
 
-            # Get peak row.
-            j = max_idx = i
-            while j < len(hor_hist) and LineSegmentor._is_probable_line(hor_hist, j, threshold):
-                if hor_hist[j] > hor_hist[max_idx]:
-                    max_idx = j
-                j += 1
-            i = j
+            # Get the row with the maximum density from the following
+            # probable row lines.
+            peak_idx = i
+            while i < len(self.hor_hist) and self.is_probable_peak(i):
+                if self.hor_hist[i] > self.hor_hist[peak_idx]:
+                    peak_idx = i
+                i += 1
 
             # Add peak row index to the list.
-            peaks.append(max_idx)
+            self.peaks.append(peak_idx)
 
-        return peaks
-
-    @staticmethod
-    def _detect_valleys(hor_hist, peaks):
-        valleys = [0]
+    def detect_valleys(self):
+        self.valleys = [0]
 
         i = 1
-        while i < len(peaks):
-            u = peaks[i - 1]
-            d = peaks[i]
+        while i < len(self.peaks):
+            u = self.peaks[i - 1]
+            d = self.peaks[i]
             i += 1
-            min_idx = u
+
+            expected_valley = d - self.avg_peaks_dist // 2
+            valley_idx = u
+
             while u < d:
-                if hor_hist[u] < hor_hist[min_idx]:
-                    min_idx = u
+                dist1 = np.abs(u - expected_valley)
+                dist2 = np.abs(valley_idx - expected_valley)
+
+                cond1 = self.hor_hist[u] < self.hor_hist[valley_idx]
+                cond2 = self.hor_hist[u] == self.hor_hist[valley_idx] and dist1 < dist2
+
+                if cond1 or cond2:
+                    valley_idx = u
+
                 u += 1
-            valleys.append(min_idx)
 
-        valleys.append(len(hor_hist) - 1)
+            self.valleys.append(valley_idx)
 
-        return valleys
+        self.valleys.append(len(self.hor_hist) - 1)
 
-    @staticmethod
-    def _detect_missing_peaks_valleys(hor_hist, peaks, valleys, avg_line_dist):
-        avg_slope = 0
-
+    def detect_missing_peaks_valleys(self):
         i = 1
-        while i < len(valleys):
-            d = valleys[i]
-            u = valleys[i - 1]
-            avg_slope += LineSegmentor._calc_range_slope(hor_hist, u, d)
-            i += 1
+        found = False
 
-        avg_slope = avg_slope // (len(valleys) - 1)
-        avg_slope //= 4
-
-        i = 1
-        while i < len(valleys):
-            dis = valleys[i] - valleys[i - 1]
-
-            if dis > 1.8 * avg_line_dist:
-                d = valleys[i]
-                u = d - avg_line_dist
-                p = LineSegmentor._detect_peak_in_range(hor_hist, u, d, avg_slope)
-
-                if p != -1:
-                    peaks.append(p)
+        while i < len(self.valleys):
+            # Calculate distance between two consecutive valleys.
+            up, down = self.valleys[i - 1], self.valleys[i]
+            dis = down - up
 
             i += 1
 
-        peaks.sort()
-        valleys = LineSegmentor._detect_valleys(hor_hist, peaks)
+            # If the distance is about twice the average distance between
+            # two consecutive peaks, then it is most probable that we are missing
+            # a line in between these two valleys.
+            if dis < 1.5 * self.avg_peaks_dist:
+                continue
 
-        return peaks, valleys
+            u = up + self.avg_peaks_dist
+            d = min(down, u + self.avg_peaks_dist)
 
-    @staticmethod
-    def _detect_peak_in_range(hor_hist, up, down, threshold):
-        range_len = down - up + 1
-        derivative = np.zeros(range_len)
+            while (d - u) > 0.5 * self.avg_peaks_dist:
+                if self.is_probable_valley(u) and self.is_probable_valley(d):
+                    peak = self.get_peak_in_range(u, d)
+                    if self.hor_hist[peak] > self.threshold_low:
+                        self.peaks.append(self.get_peak_in_range(u, d))
+                        found = True
 
-        max_der = -1e9
-        min_der = 1e9
-        peak_idx = up
+                u = u + self.avg_peaks_dist
+                d = min(down, u + self.avg_peaks_dist)
 
-        i = 1
-        while i < range_len:
-            r = up + i
+        # Re-distribute peaks and valleys if new ones are found.
+        if found:
+            self.peaks.sort()
+            self.detect_valleys()
 
-            derivative[i] = hor_hist[r] - hor_hist[r - 1]
-
-            max_der = max(max_der, derivative[i])
-            min_der = min(min_der, derivative[i])
-
-            if hor_hist[r] > hor_hist[peak_idx]:
-                peak_idx = r
-
-            i += 1
-
-        # print('Max diff', max_der - min_der)
-        # print('Threshold', threshold)
-
-        # plt.figure()
-        # plt.plot(list(range(len(derivative))), derivative)
-        # plt.draw()
-        # plt.waitforbuttonpress(0)
-        # plt.close()
-
-        if max_der - min_der < threshold:
-            return -1
-
-        return peak_idx
-
-    @staticmethod
-    def _detect_line_boundaries(bin_img, hor_hist, valleys):
+    def detect_line_boundaries(self):
         # Get image dimensions.
-        height, width = bin_img.shape
+        height, width = self.bin_img.shape
 
-        lines_boundaries = []
+        self.lines_boundaries = []
 
         i = 1
-        while i < len(valleys):
-            u = valleys[i - 1]
-            d = valleys[i]
+        while i < len(self.valleys):
+            u = self.valleys[i - 1]
+            d = self.valleys[i]
             l = 0
             r = width - 1
             i += 1
 
-            while u < d and hor_hist[u] == 0:
+            while u < d and self.hor_hist[u] == 0:
                 u += 1
-            while d > u and hor_hist[d] == 0:
+            while d > u and self.hor_hist[d] == 0:
                 d -= 1
 
-            ver_hist = np.sum(bin_img[u:d + 1, :], axis=0) // 255
+            ver_hist = np.sum(self.bin_img[u:d + 1, :], axis=0) // 255
 
             while l < r and ver_hist[l] == 0:
                 l += 1
             while r > l and ver_hist[r] == 0:
                 r -= 1
 
-            lines_boundaries.append((l, u, r, d))
+            self.lines_boundaries.append((l, u, r, d))
 
-        return lines_boundaries
-
-    @staticmethod
-    def _calc_average_line_height(lines_boundaries):
-        height = 0
-        for l, u, r, d in lines_boundaries:
-            height += d - u
-        return height / len(lines_boundaries)
-
-    @staticmethod
-    def _calc_range_slope(hor_hist, up, down):
-        max_der, min_der = -1e9, 1e9
-
-        range_len = down - up + 1
+    def calc_average_line_solve(self):
+        avg_slope = 0
 
         i = 1
-        while i < range_len:
-            val = hor_hist[up + i] - hor_hist[up + i - 1]
+        while i < len(self.valleys):
+            u = self.valleys[i - 1]
+            d = self.valleys[i]
+            avg_slope += self.calc_range_slope(u, d)
+            i += 1
+
+        return avg_slope // (len(self.valleys) - 1)
+
+    def calc_range_slope(self, up, down):
+        max_der, min_der = -1e9, 1e9
+
+        while up < down:
+            up += 1
+            val = self.hor_hist[up] - self.hor_hist[up - 1]
             max_der = max(max_der, val)
             min_der = min(min_der, val)
-            i += 1
 
         return max_der - min_der
 
-    @staticmethod
-    def _is_probable_line(hor_hist, row, threshold):
+    def get_peak_in_range(self, up, down):
+        peak_idx = up
+
+        while up < down:
+            if self.hor_hist[up] > self.hor_hist[peak_idx]:
+                peak_idx = up
+            up += 1
+
+        return peak_idx
+
+    def is_probable_peak(self, row):
         width = 15
 
         for i in range(-width, width):
-            if row + i < 0 or row + i >= len(hor_hist):
+            if row + i < 0 or row + i >= len(self.hor_hist):
                 continue
-            if hor_hist[row + i] >= threshold:
+            if self.hor_hist[row + i] >= self.threshold:
                 return True
 
         return False
 
-    @staticmethod
-    def _crop_lines(gray_img, bin_img, lines_boundaries):
+    def is_probable_valley(self, row):
+        width = 30
+        count = 0
 
-        return None, None
+        for i in range(-width, width):
+            if row + i < 0 or row + i >= len(self.hor_hist):
+                return True
+            if self.hor_hist[row + i] <= self.threshold_low:
+                count += 1
+
+        if count * 2 >= width:
+            return True
+
+        return False
+
+    def display_segmentation(self):
+        # Display only in debugging mode.
+        if not DEBUG_LINE_SEGMENTATION:
+            return
+
+        #
+        # Draw bounding box around segmented lines.
+        #
+        img = cv.cvtColor(self.gray_img, cv.COLOR_GRAY2BGR)
+
+        for l, u, r, d in self.lines_boundaries:
+            cv.rectangle(img, (l, u), (r, d), (0, 0, 255), 2)
+
+        display_image('Line Segmented Paragraph', img, False)
+
+        #
+        # Draw histogram.
+        #
+        plt.figure()
+        plt.xlabel('Row index')
+        plt.ylabel('Number of black pixels')
+        plt.plot(list(range(len(self.hor_hist))), self.hor_hist)
+        plt.plot([0, len(self.hor_hist)], [self.threshold, self.threshold], 'g--')
+
+        # Draw peaks.
+        for r in self.peaks:
+            plt.plot(r, self.hor_hist[r], 'ro')
+            plt.plot([r - self.avg_peaks_dist / 2, r + self.avg_peaks_dist / 2], [self.hor_hist[r], self.hor_hist[r]], 'r')
+
+        # Draw valleys.
+        for r in self.valleys:
+            plt.plot(r, self.hor_hist[r], 'bs')
+
+        # Draw probable missing valleys
+        i = 1
+        while i < len(self.valleys):
+            dis = self.valleys[i] - self.valleys[i - 1]
+
+            if dis > 1.8 * self.avg_peaks_dist:
+                r = self.valleys[i]
+                plt.plot(r - self.avg_peaks_dist, self.hor_hist[r], 'gs')
+
+            i += 1
+
+        plt.draw()
+        plt.waitforbuttonpress(0)
+        plt.close()
+        cv.destroyAllWindows()

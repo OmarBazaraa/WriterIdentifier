@@ -58,7 +58,7 @@ class PreProcessor:
         # Find all contours in the page.
         _, contours, hierarchy = cv.findContours(bin_img, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)
 
-        # Minimum contour width to be considered as the black separator line
+        # Minimum contour width to be considered as the black separator line.
         threshold_width = 1000
         line_offset = 10
 
@@ -79,7 +79,7 @@ class PreProcessor:
 
         # Apply erosion to remove noise and dots.
         kernel = np.ones((3, 3), np.uint8)
-        eroded_img = cv.erode(bin_img, kernel, iterations=1)
+        eroded_img = cv.erode(bin_img, kernel, iterations=2)
 
         # Get horizontal and vertical histograms.
         hor_hist = np.sum(eroded_img, axis=1) / 255
@@ -95,14 +95,14 @@ class PreProcessor:
         while down > up and hor_hist[down] == 0:
             down -= 1
 
-        # Give some padding to the paragraph
+        # Give some padding to the paragraph.
         padding = 10
         left -= padding
         up -= padding
         right += padding
         down += padding
 
-        # Display bounding box on the handwritten paragraph
+        # Display bounding box on the handwritten paragraph.
         if DEBUG_PARAGRAPH_SEGMENTATION:
             img = cv.cvtColor(gray_img, cv.COLOR_GRAY2BGR)
             cv.rectangle(img, (left, up), (right, down), (0, 0, 255), 3)
@@ -112,7 +112,7 @@ class PreProcessor:
         gray_img = gray_img[up:down + 1, left:right + 1]
         bin_img = bin_img[up:down + 1, left:right + 1]
 
-        # Display bounding box on the handwritten paragraph
+        # Write the handwritten paragraph.
         if DEBUG_PARAGRAPH_SEGMENTATION:
             cv.imwrite("../data/output/" + filename, gray_img)
 

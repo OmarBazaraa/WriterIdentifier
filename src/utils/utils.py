@@ -20,9 +20,10 @@ def display_image(name, img, wait=True):
     :type wait:     bool
     :return:        nothing.
     """
+
     h, w = img.shape[0:2]
     cv.namedWindow(name, cv.WINDOW_NORMAL)
-    cv.resizeWindow(name, w // 2, h // 2)
+    cv.resizeWindow(name, w // 3, h // 3)
     cv.imshow(name, img)
 
     if wait:
