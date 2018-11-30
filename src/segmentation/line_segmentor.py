@@ -14,6 +14,7 @@ class LineSegmentor:
         :param gray_img:    the handwritten paragraph image in gray scale.
         :param bin_img:     the handwritten paragraph image after binarization.
         """
+
         # Store references to the page images.
         self.gray_img = gray_img
         self.bin_img = bin_img
@@ -48,6 +49,7 @@ class LineSegmentor:
         :return:    two lists of lines:
                     one from the gray image and the other from the binary image.
         """
+
         # Illustrate line segmentation.
         self.display_segmentation()
 
@@ -73,6 +75,7 @@ class LineSegmentor:
 
         The peak rows are the ones with the highest black pixel density.
         """
+
         self.peaks = []
 
         i = 0
@@ -180,6 +183,7 @@ class LineSegmentor:
 
         And updates self.lines_boundaries in correspondence.
         """
+
         # Get image dimensions.
         height, width = self.bin_img.shape
 
