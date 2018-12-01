@@ -2,15 +2,10 @@ import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
 
-<<<<<<< HEAD
 # from ..segmentation.word_segmentor import WordSegmentor
 # from sklearn.neighbors import KernelDensity
-
-from ..segmentation.line_segmentor import LineSegmentor
-=======
 from src.utils.utils import *
-from src.segmentation.line_segmentor import LineSegmentor
->>>>>>> 2790cfe7b797286c1ec952850b562654a83ad650
+from ..segmentation.line_segmentor import LineSegmentor
 
 
 class FeatureExtractor:

@@ -23,8 +23,6 @@ import logging
 from mxnet.gluon.data import dataset
 from mxnet import nd
 
-from src.utils.expand_bounding_box import expand_bounding_box
-
 
 def get_writer_id(filename):
     """
@@ -35,21 +33,6 @@ def get_writer_id(filename):
     root = tree.getroot()
     writer_id = int(root.attrib["writer-id"])
     return writer_id
-
-
-# TODO remove if not eventually used.
-def crop_image(image, bb):
-    ''' Helper function to crop the image by the bounding box (in percentages)
-    '''
-    (x, y, w, h) = bb
-    x = x * image.shape[1]
-    y = y * image.shape[0]
-    w = w * image.shape[1]
-    h = h * image.shape[0]
-    (x1, y1, x2, y2) = (0, y, image.shape[1], y + h)
-    (x1, y1, x2, y2) = (int(x1), int(y1), int(x2), int(y2))
-    return image[y1 - 10:y2, x1:x2]
-
 
 def resize_image(image, desired_size):
     ''' Helper function to resize an image while keeping the aspect ratio.
@@ -93,34 +76,6 @@ def resize_image(image, desired_size):
                (image.shape[0] - bottom - top) / image.shape[0])
     image[image > 230] = 255
     return image, crop_bb
-
-
-def crop_handwriting_page(image, bb, image_size):
-    '''
-    Given an image and bounding box (bb) crop the input image based on the bounding box.
-    The final output image was scaled based on the image size.
-
-    Parameters
-    ----------
-    image: np.array
-        Input form image
-
-    bb: (x, y, w, h)
-        The bounding box in percentages to crop
-
-    image_size: (h, w)
-        Image size to scale the output image to.
-
-    Returns
-    -------
-    output_image: np.array
-        cropped image of size image_size.
-    '''
-    expanded_bb = expand_bounding_box(bb)
-    image = crop_image(image, expanded_bb)
-
-    image, _ = resize_image(image, desired_size=image_size)
-    return image
 
 
 class IAMDataset(dataset.ArrayDataset):
