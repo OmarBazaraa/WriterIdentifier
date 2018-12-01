@@ -40,6 +40,8 @@ for root, dirs, files in os.walk(data_path + "/"):
         f = extractor.extract()
         features.append(f)
 
+        print(f)
+
         # Extract label (i.e. writer id).
         # writer_id = get_writer_id(filename[:-4])
         # labels.append(writer_id)

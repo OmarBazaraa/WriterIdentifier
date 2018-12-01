@@ -34,8 +34,7 @@ class PreProcessor:
         return gray_img, bin_img
 
     @staticmethod
-    def _crop_paragraph(gray_img: np.ndarray, bin_img: np.ndarray, filename: str = 'img.png') -> \
-            (np.ndarray, np.ndarray):
+    def _crop_paragraph(gray_img: np.ndarray, bin_img: np.ndarray, filename: str = 'img.png') -> (np.ndarray, np.ndarray):
         """
         Detects the bounding box of the handwritten paragraph of the given IAM form image
         and returns a cropped image of it.

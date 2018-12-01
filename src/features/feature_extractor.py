@@ -38,9 +38,11 @@ class FeatureExtractor:
 
         self.features.append(self.horizontal_run_length())
         self.features.append(self.average_line_height())
-        self.features.append(self.average_writing_width())
+        self.features.extend(self.average_writing_width())
 
         return self.features
+
+    #####################################################################
 
     def average_line_height(self):
         """
@@ -60,22 +62,27 @@ class FeatureExtractor:
 
         return (avg_height / self.org_img.shape[0]) * 100
 
+    #####################################################################
+
     def average_writing_width(self):
         """
-        Calculates and returns the average writing spacing width.
+        Calculates and returns the average writing width.
 
         :return:    real number representing the average writing width.
         """
 
         avg_width = 0
+        avg_space = 0
 
         for line in self.bin_lines:
-            w = FeatureExtractor.get_writing_width(line)
+            w, s = FeatureExtractor.get_writing_width(line)
             avg_width += w
+            avg_space += s
 
         avg_width /= len(self.bin_lines)
+        avg_space /= len(self.bin_lines)
 
-        return avg_width
+        return [avg_width, avg_space]
 
     @staticmethod
     def get_writing_width(bin_line):
@@ -121,8 +128,22 @@ class FeatureExtractor:
 
             i = j
 
-        # Return the median of the white runs.
-        return np.median(white_runs)
+        # Get the median white run.
+        median_run = np.median(white_runs)
+
+        # Get average space width between words.
+        space_width = space_count = 0
+        for r in white_runs:
+            if r > 2 * median_run:
+                space_width += r
+                space_count += 1
+
+        space_width /= space_count
+
+        # Return writing width features.
+        return median_run, space_width
+
+    #####################################################################
 
     @staticmethod
     def get_lower_upper_baselines(gray_line, bin_line):
@@ -171,6 +192,8 @@ class FeatureExtractor:
         display_image('Base lines', img, True)
 
         return upper_baseline, lower_baseline
+
+    #####################################################################
 
     def horizontal_run_length(self):
         """
