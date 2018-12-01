@@ -12,6 +12,9 @@ start_time = time.clock()
 feature_extraction_elapsed_time = 0.0
 training_elapsed_time = 0.0
 
+# Failed images.
+images_of_interest = ['h07-084.png', 'h07-080a.png', 'h07-075a.png', 'h07-078a.png', 'k03-164.png', 'k02-053.png', 'j07-005.png']
+
 # Data set (i.e. lists of features and labels).
 features = []
 labels = []
@@ -26,8 +29,12 @@ for root, dirs, files in os.walk(data_path + "/"):
     #
     for filename in files:
         # Ignore gitignore file.
-        if filename[0] == '.' or filename == 'h07-080a.png' or filename == 'h07-075a.png':
+        if filename[0] == '.' or filename in images_of_interest:
             continue
+
+        # Extract label (i.e. writer id).
+        writer_id = get_writer_id(filename[:-4])
+        labels.append(writer_id)
 
         # Print image name.
         print(filename)
@@ -47,11 +54,6 @@ for root, dirs, files in os.walk(data_path + "/"):
         f = extractor.extract()
         features.append(f)
         feature_extraction_elapsed_time += (time.clock() - feature_extraction_start)
-
-        # Extract label (i.e. writer id).
-        writer_id = get_writer_id(filename[:-4])
-        labels.append(writer_id)
-
     # Break in order not to enter other dirs in the data/raw/form folder.
     break
 
@@ -64,14 +66,14 @@ end_training_time = time.clock()
 # Evaluate the classifier using its test set.
 validation_accuracy = classifier.evaluate()
 
-# TODO Predict a feature vector.
+# TODO Predict a label using a feature vector.
 
 # Get finish running time.
 finish_time = time.clock()
 
 # Print statistics.
-print("Processed ", len(labels), " images")
-print("Accuracy rate: ", validation_accuracy)
-print("Feature extraction elapsed time: ", feature_extraction_elapsed_time)
-print("Training elapsed time: ", end_training_time - start_training_time)
+print("Processed ", len(labels), " images.")
+print("Accuracy rate: ", validation_accuracy, '%')
+print("Feature extraction elapsed time: %.2f seconds" % feature_extraction_elapsed_time)
+print("Training elapsed time: %.2f seconds" % (end_training_time - start_training_time))
 print("This took %.2f seconds" % (finish_time - start_time))

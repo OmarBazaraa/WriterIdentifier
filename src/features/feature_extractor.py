@@ -39,7 +39,7 @@ class FeatureExtractor:
         """
 
         # self.features.append(self.horizontal_run_length()) WIP
-        # self.features.append(self.average_line_height()) WIP
+        self.features.append(self.average_line_height())
         self.features.extend(self.average_writing_width())
         self.features.extend(self.average_contours_properties())
 
@@ -156,8 +156,7 @@ class FeatureExtractor:
             f = FeatureExtractor.get_contours_properties(self.bin_lines[i])
             prop = np.add(prop, f)
 
-        return prop / len(
-            self.bin_lines)  # FIXME @OmarBazaraa  failed images: 'h07-080a.png, h07-075a.png' it has no bin nor gray img.
+        return np.multiply(prop,len(self.bin_lines))
 
     @staticmethod
     def get_contours_properties(bin_line):
