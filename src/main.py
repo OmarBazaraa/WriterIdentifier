@@ -22,7 +22,7 @@ labels = []
 
 # Read labels.
 s = open(IAMLoader.processed_data_writer_ids, 'r').read()
-labels = ast.literal_eval(s)
+writers_labels = ast.literal_eval(s)
 
 # Walk on data set directory
 for root, dirs, files in os.walk(IAMLoader.processed_data_images_path + "/gray/"):
@@ -48,6 +48,10 @@ for root, dirs, files in os.walk(IAMLoader.processed_data_images_path + "/gray/"
         f = extractor.extract()
         features.append(f)
         feature_extraction_elapsed_time += (time.clock() - feature_extraction_start)
+
+        # Append labels
+        labels.append(writers_labels[filename])
+
 
     # Break in order not to enter other dirs in the data/raw/form folder.
     break
