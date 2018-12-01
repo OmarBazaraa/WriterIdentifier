@@ -7,7 +7,7 @@ from src.utils.utils import *
 # from src.data.iam_dataset import get_writer_id
 
 # Get start running time
-start_time = time.time()
+start_time = time.clock()
 
 # Data set (i.e. lists of features and labels)
 features = []
@@ -43,18 +43,19 @@ for root, dirs, files in os.walk(data_path + "/"):
         # Extract label (i.e. writer id).
         # writer_id = get_writer_id(filename[:-4])
         # labels.append(writer_id)
-
-        # Pass features and labels to a model for training.
-        # classifier = SVMClassifier()
-        # classifier.train(features, labels)
-
-        # TODO Predict a feature vector.
+        break
 
     # Break in order not to enter other dirs in the data/raw/form folder
     break
 
+# Pass features and labels to a model for training.
+# classifier = SVMClassifier()
+# classifier.train(features, labels)
+
+# TODO Predict a feature vector.
+
 # Get finish running time
-finish_time = time.time()
+finish_time = time.clock()
 
 # Print elapsed execution time
 print("This took %.2f seconds" % (finish_time - start_time))

@@ -2,8 +2,10 @@ import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
 
+# from ..segmentation.word_segmentor import WordSegmentor
+# from sklearn.neighbors import KernelDensity
+
 from ..segmentation.line_segmentor import LineSegmentor
-from ..segmentation.word_segmentor import WordSegmentor
 
 
 class FeatureExtractor:
@@ -45,12 +47,45 @@ class FeatureExtractor:
 
     def horizontal_run_length(self):
         """
-        Get the run length feature given gray lines.
+        WIP
+        Get the horizontal run length feature given binary lines.
         :return:    a number representing the horizontal run length.
         """
-        ret = 0.0
+        freq = np.zeros((60,))
 
-        for line in self.gray_lines:
-            dummy = 1
+        # Calculate the frequency.
+        for line in self.bin_lines:
+            a = np.asarray(line)
+            a[a == 0] = 22
+            a[a == 1] = 0
+            a[a == 22] = 1
+            line_freq, bins = np.histogram(np.sum(a, axis=1), bins=60, density=True)
+            freq += line_freq
 
-        return ret
+        plt.plot(freq)
+        plt.show()
+
+        return freq
+
+    def vertical_run_length(self):
+        """
+        WIP
+        Get the vertical run length feature given binary lines.
+        :return:    a number representing the horizontal run length.
+        """
+        freq = []
+
+        # Calculate the frequency.
+        for line in self.bin_lines:
+            a = np.asarray(line)
+            a[a == 0] = 22
+            a[a == 1] = 0
+            a[a == 22] = 1
+            line_freq = np.sum(a, axis=0)[:]
+            freq.extend(line_freq)
+        print(len(freq))
+        h, b = np.histogram(np.asarray(freq), bins=60)
+        plt.plot(h)
+        plt.show()
+
+        return freq
