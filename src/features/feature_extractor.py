@@ -39,6 +39,7 @@ class FeatureExtractor:
         self.features.append(self.horizontal_run_length())
         self.features.append(self.average_line_height())
         self.features.extend(self.average_writing_width())
+        self.features.extend(self.average_contours_properties())
 
         return self.features
 
@@ -142,6 +143,49 @@ class FeatureExtractor:
 
         # Return writing width features.
         return median_run, space_width
+
+    #####################################################################
+
+    def average_contours_properties(self):
+        prop = FeatureExtractor.get_contours_properties(self.bin_lines[0])
+
+        for i in range(1, len(self.bin_lines)):
+            f = FeatureExtractor.get_contours_properties(self.bin_lines[i])
+            prop = np.add(prop, f)
+
+        return prop / len(self.bin_lines)
+
+    @staticmethod
+    def get_contours_properties(bin_line):
+        # Find all contours in the line.
+        _, contours, hierarchy = cv.findContours(bin_line, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)
+
+        aspect_ratio = 0
+        extent = 0
+        solidity = 0
+        equi_diameter = 0
+
+        for cnt in contours:
+            if len(cnt) < 3:
+                continue
+
+            x, y, w, h = cv.boundingRect(cnt)
+            rect_area = w * h
+            hull = cv.convexHull(cnt)
+            hull_area = cv.contourArea(hull)
+            area = cv.contourArea(cnt)
+
+            aspect_ratio += float(w) / h
+            extent += float(area) / rect_area
+            solidity += float(area) / hull_area
+            equi_diameter += np.sqrt(4 * area / np.pi)
+
+        aspect_ratio /= len(contours)
+        extent /= len(contours)
+        solidity /= len(contours)
+        equi_diameter /= len(contours)
+
+        return [aspect_ratio, extent, solidity, equi_diameter]
 
     #####################################################################
 
