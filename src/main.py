@@ -1,10 +1,11 @@
 import os
 import time
 
-from src.features.feature_extractor import FeatureExtractor
 from src.pre_processor import PreProcessor
+from src.features.feature_extractor import FeatureExtractor
+from src.models.train_model import SVMClassifier
 from src.utils.utils import *
-# from src.data.iam_dataset import get_writer_id
+from src.data.iam_dataset import get_writer_id
 
 # Get start running time
 start_time = time.clock()
@@ -40,19 +41,19 @@ for root, dirs, files in os.walk(data_path + "/"):
         f = extractor.extract()
         features.append(f)
 
-        print(f)
-
         # Extract label (i.e. writer id).
-        # writer_id = get_writer_id(filename[:-4])
-        # labels.append(writer_id)
-        break
+        writer_id = get_writer_id(filename[:-4])
+        labels.append(writer_id)
 
     # Break in order not to enter other dirs in the data/raw/form folder
     break
 
 # Pass features and labels to a model for training.
-# classifier = SVMClassifier()
-# classifier.train(features, labels)
+classifier = SVMClassifier(features, labels)
+classifier.train()
+
+# Evaluate the classifier using its test set.
+print("Accuracy rate: ", classifier.evaluate())
 
 # TODO Predict a feature vector.
 

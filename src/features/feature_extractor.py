@@ -38,8 +38,8 @@ class FeatureExtractor:
         :return:    the feature vector of the handwriting.
         """
 
-        self.features.append(self.horizontal_run_length())
-        self.features.append(self.average_line_height())
+        # self.features.append(self.horizontal_run_length()) WIP
+        # self.features.append(self.average_line_height()) WIP
         self.features.extend(self.average_writing_width())
         self.features.extend(self.average_contours_properties())
 
@@ -285,3 +285,10 @@ class FeatureExtractor:
         plt.show()
 
         return freq
+
+    #####################################################################
+
+    def get_slant(self):
+        return None
+
+    #####################################################################
