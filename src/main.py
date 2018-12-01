@@ -27,7 +27,7 @@ for root, dirs, files in os.walk(data_path + "/"):
             continue
 
         # Print image name
-        # print(filename)
+        print(filename)
 
         # Read image in gray scale.
         img = cv.imread(data_path + "/" + filename, cv.IMREAD_GRAYSCALE)
@@ -39,6 +39,8 @@ for root, dirs, files in os.walk(data_path + "/"):
         extractor = FeatureExtractor(img, gray_img, bin_img)
         f = extractor.extract()
         features.append(f)
+
+        print(f)
 
         # Extract label (i.e. writer id).
         # writer_id = get_writer_id(filename[:-4])
