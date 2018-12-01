@@ -141,7 +141,8 @@ class FeatureExtractor:
                 space_width += r
                 space_count += 1
 
-        space_width /= space_count
+        if space_count > 0:  # FIXME @OmarBazaraa
+            space_width /= space_count
 
         # Return writing width features.
         return median_run, space_width
@@ -155,7 +156,8 @@ class FeatureExtractor:
             f = FeatureExtractor.get_contours_properties(self.bin_lines[i])
             prop = np.add(prop, f)
 
-        return prop / len(self.bin_lines)
+        return prop / len(
+            self.bin_lines)  # FIXME @OmarBazaraa  failed images: 'h07-080a.png, h07-075a.png' it has no bin nor gray img.
 
     @staticmethod
     def get_contours_properties(bin_line):
@@ -182,10 +184,11 @@ class FeatureExtractor:
             solidity += float(area) / hull_area
             equi_diameter += np.sqrt(4 * area / np.pi)
 
-        aspect_ratio /= len(contours)
-        extent /= len(contours)
-        solidity /= len(contours)
-        equi_diameter /= len(contours)
+        if len(contours) > 0:  # FIXME @OmarBazaraa,  failed image: 'h07-080a.png'
+            aspect_ratio /= len(contours)
+            extent /= len(contours)
+            solidity /= len(contours)
+            equi_diameter /= len(contours)
 
         return [aspect_ratio, extent, solidity, equi_diameter]
 

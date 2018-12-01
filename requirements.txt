@@ -2,6 +2,3 @@ opencv-python>=3.0
 numpy
 scikit-image
 matplotlib
-mxnet
-mxboard
-pandas

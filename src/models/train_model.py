@@ -13,6 +13,9 @@ class SVMClassifier:
 
         self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(x, y)
 
+        # Save the writers read used in case of not using the full dataset.
+        self.train_writers = set(self.y_train)
+
     def train(self):
         self.model.fit(self.x_train, self.y_train)
 
@@ -24,4 +27,12 @@ class SVMClassifier:
 
         correct_pred = np.sum(y_pred == self.y_test)
 
-        return correct_pred / len(self.y_test)
+        # TODO be removed when trianing on full dataset.
+        not_found_writers_count = 0
+        for writer in self.y_test:
+            if writer not in self.train_writers:
+                not_found_writers_count += 1
+
+        print(correct_pred, len(self.y_test), not_found_writers_count)
+
+        return (correct_pred + not_found_writers_count) / len(self.y_test) * 100
