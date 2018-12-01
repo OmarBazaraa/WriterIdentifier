@@ -27,7 +27,7 @@ for root, dirs, files in os.walk(data_path + "/"):
             continue
 
         # Print image name
-        # print(filename)
+        print(filename)
 
         # Read image in gray scale.
         img = cv.imread(data_path + "/" + filename, cv.IMREAD_GRAYSCALE)
