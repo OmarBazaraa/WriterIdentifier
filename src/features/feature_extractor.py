@@ -156,7 +156,7 @@ class FeatureExtractor:
             f = FeatureExtractor.get_contours_properties(self.bin_lines[i])
             prop = np.add(prop, f)
 
-        return np.multiply(prop,len(self.bin_lines))
+        return np.multiply(prop, len(self.bin_lines))
 
     @staticmethod
     def get_contours_properties(bin_line):
@@ -183,13 +183,25 @@ class FeatureExtractor:
             solidity += float(area) / hull_area
             equi_diameter += np.sqrt(4 * area / np.pi)
 
-        if len(contours) > 0:  # FIXME @OmarBazaraa,  failed image: 'h07-080a.png'
+        # Average distance between 2 contours.
+        # From paper found in "https://link.springer.com/chapter/10.1007/3-540-44887-X_79"
+        # Sort contours according to their positions from left to right.
+        bounding_boxes = [cv.boundingRect(c) for c in contours]
+        (cnts, bounding_boxes) = zip(*sorted(zip(contours, bounding_boxes),
+                                             key=lambda b: b[1][0], reverse=False))
+        # Calculate the average distance between 2 contours.
+        dists = [bounding_boxes[i + 1][0] - (bounding_boxes[i][0] + bounding_boxes[i][2])for i in range(len(cnts) - 1)]
+        if len(dists) == 0:
+            dists = [0]
+
+        if len(contours) > 0:
             aspect_ratio /= len(contours)
             extent /= len(contours)
             solidity /= len(contours)
             equi_diameter /= len(contours)
 
-        return [aspect_ratio, extent, solidity, equi_diameter]
+        return [np.mean(dists), aspect_ratio, extent, solidity, equi_diameter]
+        # return [np.mean(dists)]
 
     #####################################################################
 

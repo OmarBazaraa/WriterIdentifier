@@ -3,7 +3,7 @@ import time
 import ast
 
 from src.features.feature_extractor import FeatureExtractor
-from src.models.train_model import SVMClassifier
+from src.models.train_model import *
 from src.utils.utils import *
 from src.data.iam_dataset import IAMLoader
 
@@ -52,13 +52,12 @@ for root, dirs, files in os.walk(IAMLoader.processed_data_images_path + "/gray/"
         # Append labels
         labels.append(writers_labels[filename])
 
-
     # Break in order not to enter other dirs in the data/raw/form folder.
     break
 
 # Pass features and labels to a model for training.
-start_training_time = 0.0
-classifier = SVMClassifier(features, labels)
+start_training_time = time.clock()
+classifier = Classifier('mlp', features, labels)
 classifier.train()
 end_training_time = time.clock()
 

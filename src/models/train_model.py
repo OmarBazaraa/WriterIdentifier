@@ -1,15 +1,17 @@
 import numpy as np
 from sklearn import svm
 from sklearn.model_selection import train_test_split
+from sklearn.neural_network import MLPClassifier as mlp
 
 
-class SVMClassifier:
-    def __init__(self, x, y):
+class Classifier:
+    def __init__(self,type, x, y):
         # TODO modify these parameters
-        self.model = svm.SVC(C=1.0, cache_size=200, class_weight=None, coef0=0.0,
-                             decision_function_shape='ovr', degree=3, kernel='rbf',
-                             max_iter=-1, probability=False, random_state=None, shrinking=True,
-                             tol=0.001, verbose=False)
+        if type == 'svm':
+            self.model = svm.SVC(C=1.0)
+        elif type == 'mlp':
+            self.model = mlp(solver='sgd', activation='tanh', alpha=1e-5, hidden_layer_sizes=(5,), random_state=1,
+                             max_iter=1000)
 
         self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(x, y)
 
@@ -35,4 +37,4 @@ class SVMClassifier:
 
         print(correct_pred, len(self.y_test), not_found_writers_count)
 
-        return (correct_pred + not_found_writers_count) / len(self.y_test) * 100
+        return correct_pred / (len(self.y_test) - not_found_writers_count) * 100
