@@ -38,7 +38,8 @@ class FeatureExtractor:
         :return:    the feature vector of the handwriting.
         """
 
-        # self.features.append(self.horizontal_run_length()) WIP
+        # self.features.append(self.horizontal_run_length()) # WIP
+        # self.features.append(self.vertical_run_length()) # WIP
         self.features.append(self.average_line_height())
         self.features.extend(self.average_writing_width())
         self.features.extend(self.average_contours_properties())
@@ -183,16 +184,16 @@ class FeatureExtractor:
             solidity += float(area) / hull_area
             equi_diameter += np.sqrt(4 * area / np.pi)
 
-        # Average distance between 2 contours.
-        # From paper found in "https://link.springer.com/chapter/10.1007/3-540-44887-X_79"
-        # Sort contours according to their positions from left to right.
-        bounding_boxes = [cv.boundingRect(c) for c in contours]
-        (cnts, bounding_boxes) = zip(*sorted(zip(contours, bounding_boxes),
-                                             key=lambda b: b[1][0], reverse=False))
-        # Calculate the average distance between 2 contours.
-        dists = [bounding_boxes[i + 1][0] - (bounding_boxes[i][0] + bounding_boxes[i][2])for i in range(len(cnts) - 1)]
-        if len(dists) == 0:
-            dists = [0]
+        # # Average distance between 2 contours.
+        # # From paper found in "https://link.springer.com/chapter/10.1007/3-540-44887-X_79"
+        # # Sort contours according to their positions from left to right.
+        # bounding_boxes = [cv.boundingRect(c) for c in contours]
+        # (cnts, bounding_boxes) = zip(*sorted(zip(contours, bounding_boxes),
+        #                                      key=lambda b: b[1][0], reverse=False))
+        # # Calculate the average distance between 2 contours.
+        # dists = [bounding_boxes[i + 1][0] - (bounding_boxes[i][0])for i in range(len(cnts) - 1)]
+        # if len(dists) == 0:
+        #     dists = [0]
 
         if len(contours) > 0:
             aspect_ratio /= len(contours)
@@ -200,8 +201,7 @@ class FeatureExtractor:
             solidity /= len(contours)
             equi_diameter /= len(contours)
 
-        return [np.mean(dists), aspect_ratio, extent, solidity, equi_diameter]
-        # return [np.mean(dists)]
+        return [aspect_ratio, extent, solidity, equi_diameter]
 
     #####################################################################
 
@@ -261,21 +261,19 @@ class FeatureExtractor:
         Get the horizontal run length feature given binary lines.
         :return:    a pdf representing the horizontal run length.
         """
-        freq = np.zeros((60,))
+        freq = np.zeros((1000,))
 
         # Calculate the frequency.
         for line in self.bin_lines:
-            a = np.asarray(line)
-            a[a == 0] = 22
+            a = np.asarray(line).copy()
+            # Swap white with black.
+            a[a == 0] = 3
             a[a == 1] = 0
-            a[a == 22] = 1
-            line_freq, bins = np.histogram(np.sum(a, axis=1), bins=60, density=True)
+            a[a == 3] = 1
+            line_freq, bins = np.histogram(np.sum(a, axis=1), bins=1000, density=True)
             freq += line_freq
 
-        plt.plot(freq)
-        plt.show()
-
-        return freq
+        return np.argmax(freq)
 
     def vertical_run_length(self):
         """
@@ -283,22 +281,19 @@ class FeatureExtractor:
         Get the vertical run length feature given binary lines.
         :return:    a pdf representing the horizontal run length.
         """
-        freq = []
+        freq = np.zeros((1000,))
 
         # Calculate the frequency.
         for line in self.bin_lines:
-            a = np.asarray(line)
-            a[a == 0] = 22
+            a = np.asarray(line).copy()
+            # Swap white with black.
+            a[a == 0] = 3
             a[a == 1] = 0
-            a[a == 22] = 1
-            line_freq = np.sum(a, axis=0)[:]
-            freq.extend(line_freq)
-        print(len(freq))
-        h, b = np.histogram(np.asarray(freq), bins=60)
-        plt.plot(h)
-        plt.show()
+            a[a == 3] = 1
+            line_freq, bins = np.histogram(np.sum(a, axis=0), bins=1000, density=True)
+            freq += line_freq
 
-        return freq
+        return np.argmax(freq)
 
     #####################################################################
 

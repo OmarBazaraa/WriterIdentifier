@@ -10,8 +10,7 @@ class Classifier:
         if type == 'svm':
             self.model = svm.SVC(C=1.0)
         elif type == 'mlp':
-            self.model = mlp(solver='sgd', activation='tanh', alpha=1e-5, hidden_layer_sizes=(5,), random_state=1,
-                             max_iter=1000)
+            self.model = mlp(solver='sgd', activation='logistic', alpha=1e-5, hidden_layer_sizes=(5,), random_state=1)
 
         self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(x, y)
 

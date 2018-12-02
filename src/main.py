@@ -35,7 +35,7 @@ for root, dirs, files in os.walk(IAMLoader.processed_data_images_path + "/gray/"
             continue
 
         # Print image name.
-        print(filename)
+        # print(filename)
 
         # Read image in gray scale.
         org_img = cv.imread(IAMLoader.raw_data_path + "/" + filename, cv.IMREAD_GRAYSCALE)
