@@ -29,13 +29,14 @@ for root, dirs, files in os.walk(IAMLoader.processed_data_images_path + "/gray/"
     #
     # Loop on every file in the directory.
     #
+    i = 0
     for filename in files:
         # Ignore gitignore file.
-        if filename[0] == '.' or filename in IAMLoader.images_of_interest:
+        if i > 2 or filename[0] == '.' or filename in IAMLoader.images_of_interest:
             continue
 
         # Print image name.
-        # print(filename)
+        print(filename)
 
         # Read image in gray scale.
         org_img = cv.imread(IAMLoader.raw_data_path + "/" + filename, cv.IMREAD_GRAYSCALE)
@@ -51,6 +52,7 @@ for root, dirs, files in os.walk(IAMLoader.processed_data_images_path + "/gray/"
 
         # Append labels
         labels.append(writers_labels[filename])
+        i += 1
 
     # Break in order not to enter other dirs in the data/raw/form folder.
     break

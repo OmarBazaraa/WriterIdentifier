@@ -1,16 +1,22 @@
 import numpy as np
 from sklearn import svm
+from sklearn.mixture import GaussianMixture
 from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPClassifier as mlp
 
 
 class Classifier:
-    def __init__(self,type, x, y):
+    def __init__(self, mtype, x, y):
         # TODO modify these parameters
-        if type == 'svm':
+        if mtype == 'svm':
             self.model = svm.SVC(C=1.0)
-        elif type == 'mlp':
+        elif mtype == 'mlp':
             self.model = mlp(solver='sgd', activation='logistic', alpha=1e-5, hidden_layer_sizes=(5,), random_state=1)
+        elif mtype == 'gmm':
+            self.model = GaussianMixture(n_components=100,
+                                         covariance_type='diag', tol=0.001, reg_covar=1e-06, max_iter=100, n_init=1,
+                                         init_params='kmeans', weights_init=None, means_init=None, precisions_init=None,
+                                         random_state=None, warm_start=False, verbose=0, verbose_interval=10)
 
         self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(x, y)
 

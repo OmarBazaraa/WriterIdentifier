@@ -1,9 +1,12 @@
+import time
+
 import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
 
 # from ..segmentation.word_segmentor import WordSegmentor
 # from sklearn.neighbors import KernelDensity
+from src.features.thinning import zhangSuen
 from src.utils.utils import *
 from ..segmentation.line_segmentor import LineSegmentor
 
@@ -40,9 +43,10 @@ class FeatureExtractor:
 
         # self.features.append(self.horizontal_run_length()) # WIP
         # self.features.append(self.vertical_run_length()) # WIP
-        self.features.append(self.average_line_height())
-        self.features.extend(self.average_writing_width())
-        self.features.extend(self.average_contours_properties())
+        # self.features.append(self.average_line_height())
+        # self.features.extend(self.average_writing_width())
+        # self.features.extend(self.average_contours_properties())
+        self.features.extend(self.get_gmm_writer_features(14))
 
         return self.features
 
@@ -301,3 +305,65 @@ class FeatureExtractor:
         return None
 
     #####################################################################
+
+    # For GMM Model features.
+    def get_gmm_writer_features(self, sliding_window_width):
+        # Loop over each line.
+        line_feauters = []
+        for line in self.bin_lines:
+            # Apply thinning algorithm.
+            skeleton_image = zhangSuen(line)
+
+            # Features
+            features = []
+
+            # For every column of pixels apply the sliding window.
+            t = time.clock()
+            for i in range(np.asarray(line).shape[1] - sliding_window_width):
+                # Get the window of image.
+                window = line[:, i:i + sliding_window_width]
+
+                # Get the first feature (number of black pixels).
+                s = time.clock()
+                num_black_pixels = cv.countNonZero(window)
+                print(time.clock() - s, " CountNonZeros")
+
+                # Find all contours in the line.
+                _, contours, hierarchy = cv.findContours(line, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)
+
+                # Get the moments.
+                s = time.clock()
+                mu = [cv.moments(cnt, False) for cnt in contours]
+                print(time.clock() - s, "Moments")
+
+                # Calculate centre of gravity.
+                s = time.clock()
+                centre_of_gravity = np.mean(
+                    [(mu[i]['m10'] / (mu[i]['m00'] + 0.001), mu[i]['m01'] / (mu[i]['m00'] + 0.001)) for i in
+                     range(len(mu))],
+                    axis=0)
+                print(time.clock() - s, " Centre of gravity")
+
+                # Get the position of the upper and the lower contour.
+                # x, y, w, h = cv.boundingRect(cnt).
+                rects = [cv.boundingRect(cnt) for cnt in contours]
+                up, lw = (np.min([rect[0] for rect in rects]), np.max([rect[0] for rect in rects]))
+
+                # Calculate second order moments.
+                second_order_moments = np.mean(
+                    [(mu[i]['m02'], mu[i]['m20']) for i in
+                     range(len(mu))],
+                    axis=0)
+
+                # TODO add left features.
+                features.append([num_black_pixels, up, lw])
+                features.extend(centre_of_gravity)
+                features.extend(second_order_moments)
+
+            print(time.clock() - t, " LOOP BADASS TIME")
+
+            line_feauters.extend(np.mean(features, axis=0))
+            # Make it on one line. FIXME
+            break
+        print(line_feauters)
+        return line_feauters

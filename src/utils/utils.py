@@ -8,6 +8,7 @@ GENERATE_PRE_PROCESSED_DATA = False
 # Debugging flags.
 DEBUG_PARAGRAPH_SEGMENTATION = False
 DEBUG_LINE_SEGMENTATION = False
+DEGUB_THINNING_ALGORITHM = False
 
 
 def display_image(name: str, img: np.ndarray, wait: bool = True) -> None:
