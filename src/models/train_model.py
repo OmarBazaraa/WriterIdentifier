@@ -82,7 +82,7 @@ class GMMModel:
             idx = {}
             i = 0
             for key in self.writers_models.keys():
-                idx[key] = i
+                idx[i] = key
                 i += 1
                 probabilities = self.writers_models[key].predict(np.reshape(writer_features, (len(writer_features), 7)))
                 lines_probabilities.append(np.log2(probabilities))
@@ -91,6 +91,6 @@ class GMMModel:
                 (len(lines_probabilities), len(lines_probabilities[0])))
 
             predictions = [idx[k] for k in np.argmax(lines_probabilities, axis=0)]
-            correct.extend(predictions == writer_id)
+            correct.extend([j == writer_id for j in predictions])
 
         return np.mean(correct)
