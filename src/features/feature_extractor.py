@@ -319,7 +319,10 @@ class FeatureExtractor:
 
             # For every column of pixels apply the sliding window.
             t = time.clock()
-            for i in range(np.asarray(line).shape[1] - sliding_window_width):
+            x = []
+            for i in range(0, (line.shape[1] - sliding_window_width), sliding_window_width):
+                x.append(i)
+                t  =time.clock()
                 window_features = []
                 # Get the window of image.
                 window = line[:, i:i + sliding_window_width]
@@ -329,7 +332,8 @@ class FeatureExtractor:
 
                 # Find all contours in the line.
                 _, contours, hierarchy = cv.findContours(window, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)
-
+                # print("F1 ", time.clock() -t)
+                t = time.clock()
                 # Ignore window without any contours.
                 if len(contours) == 0:
                     continue
@@ -347,7 +351,8 @@ class FeatureExtractor:
                 # x, y, w, h = cv.boundingRect(cnt).
                 rects = [cv.boundingRect(cnt) for cnt in contours]
                 up, lw = (np.min([rect[0] for rect in rects]), np.max([rect[0] for rect in rects]))
-
+                # print("F2 ", time.clock()-t)
+                t = time.clock()
                 # Calculate second order moments. F4
                 second_order_moments = np.mean(
                     [(mu[i]['m02'], mu[i]['m20']) for i in
@@ -362,5 +367,8 @@ class FeatureExtractor:
                 # Append to windows_features.
                 windows_features.append(window_features)
 
-            lines_feauters.extend(np.mean(windows_features, axis=0))
+                # print("F3 ", time.clock() - t)
+
+            lines_feauters.append(np.mean(windows_features, axis=0))
+
         return lines_feauters

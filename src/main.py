@@ -53,7 +53,7 @@ for root, dirs, files in os.walk(IAMLoader.processed_data_images_path + "/gray/"
         f = FeatureExtractor(org_img, gray_img, bin_img).extract()
         if writer_id not in writers_features.keys():
             writers_features[writer_id] = []
-        writers_features[writer_id].append(f)
+        writers_features[writer_id].extend(f)
 
         feature_extraction_elapsed_time += (time.clock() - feature_extraction_start)
 
@@ -74,6 +74,11 @@ for root, dirs, files in os.walk(IAMLoader.processed_data_images_path + "/gray/"
 # validation_accuracy = classifier.evaluate()
 
 # TODO Predict a label using a feature vector.
+gmm_model = GMMModel(writers_features)
+start_training_time = time.clock()
+gmm_model.get_writers_models()
+end_training_time = time.clock()
+validation_accuracy = gmm_model.evaluate()
 
 # Get finish running time.
 finish_time = time.clock()

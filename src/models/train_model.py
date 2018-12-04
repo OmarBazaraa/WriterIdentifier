@@ -45,14 +45,13 @@ class GMMModel:
         # Create a gmm model for each writer.
 
         # Save the writers read used in case of not using the full dataset.
-        self.train_writers = set(self.y_train)
         self.writers_models = {}
         self.writers_features = writers_features
         self.writers_probs = {}
 
     def get_writers_models(self):
-        for writer_id, writer_features in self.writers_features:
-            self.writers_models[writer_id] = GaussianMixture(n_components=100,
+        for writer_id, writer_features in self.writers_features.items():
+            self.writers_models[writer_id] = GaussianMixture(n_components=len(writer_features),
                                                              covariance_type='diag', tol=0.001, reg_covar=1e-06,
                                                              max_iter=100, n_init=1,
                                                              init_params='kmeans', weights_init=None, means_init=None,
@@ -66,14 +65,27 @@ class GMMModel:
 
     def predict(self, x):
         self.writers_probs = {}
-        for writer_id, writer_model in self.writers_models:
+        for writer_id, writer_model in self.writers_models.items():
             # Predict and save the probability.
             self.writers_probs[writer_id] = writer_model.predict(x)
 
         return self.writers_probs
 
     def evaluate(self):
-        for writer_id, writer_features in self.writers_features:
-            probs = self.predict(writer_features[0])
-            print(probs)
-        return
+        predictions = []
+        for writer_id, writer_features in self.writers_features.items():
+            max_prob = -1000
+            pred_writer_id = -1
+            # Predict for all writers
+            for key in self.writers_models.keys():
+                probabilities = self.writers_models[key].predict(np.reshape(writer_features, (len(writer_features), 7)))
+                prob = np.log2(np.max(probabilities))
+                if prob > max_prob:
+                    max_prob = prob
+                    pred_writer_id = key
+
+            # Get the max prob.
+            print("For image of actual writer id: ", writer_id, ", the predicted writer is ", pred_writer_id)
+            predictions.append(pred_writer_id==writer_id)
+
+        return np.mean(predictions)
