@@ -30,10 +30,9 @@ for root, dirs, files in os.walk(IAMLoader.processed_data_images_path + "/gray/"
     #
     # Loop on every file in the directory.
     #
-    i = 0
     for filename in files:
         # Ignore gitignore file.
-        if i > 2 or filename[0] == '.' or filename in IAMLoader.images_of_interest:
+        if filename not in IAMLoader.top_writers_ids or filename[0] == '.' or filename in IAMLoader.images_of_interest:
             continue
 
         # Print image name.
@@ -59,7 +58,6 @@ for root, dirs, files in os.walk(IAMLoader.processed_data_images_path + "/gray/"
 
         # Append labels
         labels.append(writer_id)
-        i += 1
 
     # Break in order not to enter other dirs in the data/raw/form folder.
     break
