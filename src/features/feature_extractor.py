@@ -322,7 +322,7 @@ class FeatureExtractor:
             x = []
             for i in range(0, (line.shape[1] - sliding_window_width), sliding_window_width):
                 x.append(i)
-                t  =time.clock()
+                t = time.clock()
                 window_features = []
                 # Get the window of image.
                 window = line[:, i:i + sliding_window_width]

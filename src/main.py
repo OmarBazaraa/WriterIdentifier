@@ -35,14 +35,14 @@ for root, dirs, files in os.walk(IAMLoader.processed_data_images_path + "/gray/"
         if filename[0] == '.' or filename in IAMLoader.images_of_interest:
             continue
 
-        # Print image name.
-        print(filename)
-
         # Get writer id.
         writer_id = writers_labels[filename]
 
         if writer_id not in IAMLoader.top_writers_ids:
             continue
+
+        # Print image name.
+        print(filename, writer_id)
 
         # Read image in gray scale.
         org_img = cv.imread(IAMLoader.raw_data_path + "/" + filename, cv.IMREAD_GRAYSCALE)
@@ -73,8 +73,6 @@ for root, dirs, files in os.walk(IAMLoader.processed_data_images_path + "/gray/"
 
 # Evaluate the classifier using its test set.
 # validation_accuracy = classifier.evaluate()
-
-# TODO Predict a label using a feature vector.
 gmm_model = GMMModel(writers_features)
 start_training_time = time.clock()
 gmm_model.get_writers_models()

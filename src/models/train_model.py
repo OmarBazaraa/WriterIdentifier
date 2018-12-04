@@ -72,20 +72,25 @@ class GMMModel:
         return self.writers_probs
 
     def evaluate(self):
-        predictions = []
+        correct = []
+        # Loop over all writers.
         for writer_id, writer_features in self.writers_features.items():
             max_prob = -1000
             pred_writer_id = -1
-            # Predict for all writers
+            # Predict each line whether it belongs to which writer.
+            lines_probabilities = []
+            idx = {}
+            i = 0
             for key in self.writers_models.keys():
+                idx[key] = i
+                i += 1
                 probabilities = self.writers_models[key].predict(np.reshape(writer_features, (len(writer_features), 7)))
-                prob = np.log2(np.max(probabilities))
-                if prob > max_prob:
-                    max_prob = prob
-                    pred_writer_id = key
+                lines_probabilities.append(np.log2(probabilities))
 
-            # Get the max prob.
-            print("For image of actual writer id: ", writer_id, ", the predicted writer is ", pred_writer_id)
-            predictions.append(pred_writer_id==writer_id)
+            lines_probabilities = np.asarray(lines_probabilities).reshape(
+                (len(lines_probabilities), len(lines_probabilities[0])))
 
-        return np.mean(predictions)
+            predictions = [idx[k] for k in np.argmax(lines_probabilities, axis=0)]
+            correct.extend(predictions == writer_id)
+
+        return np.mean(correct)
