@@ -248,7 +248,7 @@ class FeatureExtractor:
 
             ub -= 1
 
-        print('Iterations:', iterations)
+        # print('Iterations:', iterations)
 
         img = cv.cvtColor(gray_line, cv.COLOR_GRAY2BGR)
         cv.line(img, (0, upper_baseline), (width, upper_baseline), (0, 0, 255), 2)
@@ -309,61 +309,58 @@ class FeatureExtractor:
     # For GMM Model features.
     def get_gmm_writer_features(self, sliding_window_width):
         # Loop over each line.
-        line_feauters = []
+        lines_feauters = []
         for line in self.bin_lines:
             # Apply thinning algorithm.
             skeleton_image = zhangSuen(line)
 
             # Features
-            features = []
+            windows_features = []
 
             # For every column of pixels apply the sliding window.
             t = time.clock()
             for i in range(np.asarray(line).shape[1] - sliding_window_width):
+                window_features = []
                 # Get the window of image.
                 window = line[:, i:i + sliding_window_width]
 
-                # Get the first feature (number of black pixels).
-                s = time.clock()
+                # Get number of black pixels. F1
                 num_black_pixels = cv.countNonZero(window)
-                print(time.clock() - s, " CountNonZeros")
 
                 # Find all contours in the line.
-                _, contours, hierarchy = cv.findContours(line, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)
+                _, contours, hierarchy = cv.findContours(window, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)
+
+                # Ignore window without any contours.
+                if len(contours) == 0:
+                    continue
 
                 # Get the moments.
-                s = time.clock()
                 mu = [cv.moments(cnt, False) for cnt in contours]
-                print(time.clock() - s, "Moments")
 
-                # Calculate centre of gravity.
-                s = time.clock()
+                # Calculate centre of gravity. F2
                 centre_of_gravity = np.mean(
                     [(mu[i]['m10'] / (mu[i]['m00'] + 0.001), mu[i]['m01'] / (mu[i]['m00'] + 0.001)) for i in
                      range(len(mu))],
                     axis=0)
-                print(time.clock() - s, " Centre of gravity")
 
-                # Get the position of the upper and the lower contour.
+                # Get the position of the upper and the lower contour. F3
                 # x, y, w, h = cv.boundingRect(cnt).
                 rects = [cv.boundingRect(cnt) for cnt in contours]
                 up, lw = (np.min([rect[0] for rect in rects]), np.max([rect[0] for rect in rects]))
 
-                # Calculate second order moments.
+                # Calculate second order moments. F4
                 second_order_moments = np.mean(
                     [(mu[i]['m02'], mu[i]['m20']) for i in
                      range(len(mu))],
                     axis=0)
 
-                # TODO add left features.
-                features.append([num_black_pixels, up, lw])
-                features.extend(centre_of_gravity)
-                features.extend(second_order_moments)
+                # TODO add left features. F5, F6, F7, F8, F9.
+                window_features.extend([num_black_pixels, up, lw])
+                window_features.extend(centre_of_gravity)
+                window_features.extend(second_order_moments)
 
-            print(time.clock() - t, " LOOP BADASS TIME")
+                # Append to windows_features.
+                windows_features.append(window_features)
 
-            line_feauters.extend(np.mean(features, axis=0))
-            # Make it on one line. FIXME
-            break
-        print(line_feauters)
-        return line_feauters
+            lines_feauters.extend(np.mean(windows_features, axis=0))
+        return lines_feauters
