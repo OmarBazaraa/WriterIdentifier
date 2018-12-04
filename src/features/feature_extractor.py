@@ -1,9 +1,12 @@
+import time
+
 import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
 
 # from ..segmentation.word_segmentor import WordSegmentor
 # from sklearn.neighbors import KernelDensity
+from src.features.thinning import zhangSuen
 from src.utils.utils import *
 from ..segmentation.line_segmentor import LineSegmentor
 
@@ -40,9 +43,10 @@ class FeatureExtractor:
 
         # self.features.append(self.horizontal_run_length()) # WIP
         # self.features.append(self.vertical_run_length()) # WIP
-        self.features.append(self.average_line_height())
-        self.features.extend(self.average_writing_width())
-        self.features.extend(self.average_contours_properties())
+        # self.features.append(self.average_line_height())
+        # self.features.extend(self.average_writing_width())
+        # self.features.extend(self.average_contours_properties())
+        self.features.extend(self.get_gmm_writer_features(14))
 
         return self.features
 
@@ -244,7 +248,7 @@ class FeatureExtractor:
 
             ub -= 1
 
-        print('Iterations:', iterations)
+        # print('Iterations:', iterations)
 
         img = cv.cvtColor(gray_line, cv.COLOR_GRAY2BGR)
         cv.line(img, (0, upper_baseline), (width, upper_baseline), (0, 0, 255), 2)
@@ -301,3 +305,70 @@ class FeatureExtractor:
         return None
 
     #####################################################################
+
+    # For GMM Model features.
+    def get_gmm_writer_features(self, sliding_window_width):
+        # Loop over each line.
+        lines_feauters = []
+        for line in self.bin_lines:
+            # Apply thinning algorithm.
+            skeleton_image = zhangSuen(line)
+
+            # Features
+            windows_features = []
+
+            # For every column of pixels apply the sliding window.
+            t = time.clock()
+            x = []
+            for i in range(0, (line.shape[1] - sliding_window_width), sliding_window_width):
+                x.append(i)
+                t = time.clock()
+                window_features = []
+                # Get the window of image.
+                window = line[:, i:i + sliding_window_width]
+
+                # Get number of black pixels. F1
+                num_black_pixels = cv.countNonZero(window)
+
+                # Find all contours in the line.
+                _, contours, hierarchy = cv.findContours(window, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)
+                # print("F1 ", time.clock() -t)
+                t = time.clock()
+                # Ignore window without any contours.
+                if len(contours) == 0:
+                    continue
+
+                # Get the moments.
+                mu = [cv.moments(cnt, False) for cnt in contours]
+
+                # Calculate centre of gravity. F2
+                centre_of_gravity = np.mean(
+                    [(mu[i]['m10'] / (mu[i]['m00'] + 0.001), mu[i]['m01'] / (mu[i]['m00'] + 0.001)) for i in
+                     range(len(mu))],
+                    axis=0)
+
+                # Get the position of the upper and the lower contour. F3
+                # x, y, w, h = cv.boundingRect(cnt).
+                rects = [cv.boundingRect(cnt) for cnt in contours]
+                up, lw = (np.min([rect[0] for rect in rects]), np.max([rect[0] for rect in rects]))
+                # print("F2 ", time.clock()-t)
+                t = time.clock()
+                # Calculate second order moments. F4
+                second_order_moments = np.mean(
+                    [(mu[i]['m02'], mu[i]['m20']) for i in
+                     range(len(mu))],
+                    axis=0)
+
+                # TODO add left features. F5, F6, F7, F8, F9.
+                window_features.extend([num_black_pixels, up, lw])
+                window_features.extend(centre_of_gravity)
+                window_features.extend(second_order_moments)
+
+                # Append to windows_features.
+                windows_features.append(window_features)
+
+                # print("F3 ", time.clock() - t)
+
+            lines_feauters.append(np.mean(windows_features, axis=0))
+
+        return lines_feauters

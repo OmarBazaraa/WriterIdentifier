@@ -19,6 +19,7 @@ if GENERATE_PRE_PROCESSED_DATA:
 # Data set (i.e. lists of features and labels).
 features = []
 labels = []
+writers_features = {}
 
 # Read labels.
 s = open(IAMLoader.processed_data_writer_ids, 'r').read()
@@ -34,8 +35,14 @@ for root, dirs, files in os.walk(IAMLoader.processed_data_images_path + "/gray/"
         if filename[0] == '.' or filename in IAMLoader.images_of_interest:
             continue
 
+        # Get writer id.
+        writer_id = writers_labels[filename]
+
+        if writer_id not in IAMLoader.top_writers_ids:
+            continue
+
         # Print image name.
-        # print(filename)
+        print(filename, writer_id)
 
         # Read image in gray scale.
         org_img = cv.imread(IAMLoader.raw_data_path + "/" + filename, cv.IMREAD_GRAYSCALE)
@@ -44,27 +51,33 @@ for root, dirs, files in os.walk(IAMLoader.processed_data_images_path + "/gray/"
 
         # Extract features.
         feature_extraction_start = time.clock()
-        extractor = FeatureExtractor(org_img, gray_img, bin_img)
-        f = extractor.extract()
-        features.append(f)
+
+        f = FeatureExtractor(org_img, gray_img, bin_img).extract()
+        if writer_id not in writers_features.keys():
+            writers_features[writer_id] = []
+        writers_features[writer_id].extend(f)
+
         feature_extraction_elapsed_time += (time.clock() - feature_extraction_start)
 
         # Append labels
-        labels.append(writers_labels[filename])
+        labels.append(writer_id)
 
     # Break in order not to enter other dirs in the data/raw/form folder.
     break
 
 # Pass features and labels to a model for training.
-start_training_time = time.clock()
-classifier = Classifier('mlp', features, labels)
-classifier.train()
-end_training_time = time.clock()
+# start_training_time = time.clock()
+# classifier = Classifier('mlp', features, labels)
+# classifier.train()
+# end_training_time = time.clock()
 
 # Evaluate the classifier using its test set.
-validation_accuracy = classifier.evaluate()
-
-# TODO Predict a label using a feature vector.
+# validation_accuracy = classifier.evaluate()
+gmm_model = GMMModel(writers_features)
+start_training_time = time.clock()
+gmm_model.get_writers_models()
+end_training_time = time.clock()
+validation_accuracy = gmm_model.evaluate()
 
 # Get finish running time.
 finish_time = time.clock()

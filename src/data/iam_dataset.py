@@ -16,6 +16,20 @@ class IAMLoader:
     images_of_interest = ['h07-084.png', 'h07-080a.png', 'h07-075a.png', 'h07-078a.png', 'k03-164.png', 'k02-053.png',
                           'j07-005.png']
 
+    # Top Writers only with freq of 10 pages and ignoring the wirter 0 who has 59 images.
+    top_writers_ids = [150,
+                       151,
+                       152,
+                       153,
+                       154,
+                       384,
+                       551,
+                       552,
+                       588,
+                       635,
+                       670,
+                       671]
+
     @staticmethod
     def generate_processed_data():
         labels = {}
