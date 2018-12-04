@@ -32,7 +32,7 @@ for root, dirs, files in os.walk(IAMLoader.processed_data_images_path + "/gray/"
     #
     for filename in files:
         # Ignore gitignore file.
-        if filename not in IAMLoader.top_writers_ids or filename[0] == '.' or filename in IAMLoader.images_of_interest:
+        if filename[0] == '.' or filename in IAMLoader.images_of_interest:
             continue
 
         # Print image name.
@@ -40,6 +40,9 @@ for root, dirs, files in os.walk(IAMLoader.processed_data_images_path + "/gray/"
 
         # Get writer id.
         writer_id = writers_labels[filename]
+
+        if writer_id not in IAMLoader.top_writers_ids:
+            continue
 
         # Read image in gray scale.
         org_img = cv.imread(IAMLoader.raw_data_path + "/" + filename, cv.IMREAD_GRAYSCALE)
