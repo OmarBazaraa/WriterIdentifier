@@ -51,9 +51,9 @@ class GMMModel:
 
     def get_writers_models(self):
         for writer_id, writer_features in self.writers_features.items():
-            self.writers_models[writer_id] = GaussianMixture(n_components=7,
-                                                             covariance_type='diag', tol=0.001, reg_covar=1e-06,
-                                                             max_iter=100, n_init=1,
+            self.writers_models[writer_id] = GaussianMixture(n_components=len(writer_features),
+                                                             covariance_type='diag', tol=0.00001, reg_covar=1e-06,
+                                                             max_iter=99999, n_init=1,
                                                              init_params='kmeans', weights_init=None, means_init=None,
                                                              precisions_init=None,
                                                              random_state=None, warm_start=False, verbose=0,
@@ -72,7 +72,9 @@ class GMMModel:
         return self.writers_probs
 
     def evaluate(self, t):
+        ret = []
         correct = []
+
         # Loop over all writers.
         for writer_id, writer_features in self.writers_features.items():
             # Predict each line whether it belongs to which writer.
@@ -87,5 +89,21 @@ class GMMModel:
 
             predictions = idx[np.argmax(lines_probabilities)]
             correct.append(predictions == writer_id)
+        ret.extend(correct)
+        correct = []
+        # Loop over all writers.
+        for writer_id, writer_features in t.items():
+            # Predict each line whether it belongs to which writer.
+            lines_probabilities = []
+            idx = {}
+            i = 0
+            for key in self.writers_models.keys():
+                idx[i] = key
+                i += 1
+                probabilities = self.writers_models[key].score(np.reshape(writer_features, (len(writer_features), 7)))
+                lines_probabilities.append(probabilities)
+            predictions = idx[np.argmax(lines_probabilities)]
+            print(lines_probabilities)
+            correct.append(predictions == writer_id)
 
-        return np.mean(correct)
+        return np.mean(ret), np.mean(correct)

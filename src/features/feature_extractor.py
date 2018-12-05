@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 
 # from ..segmentation.word_segmentor import WordSegmentor
 # from sklearn.neighbors import KernelDensity
+from skimage.morphology import skeletonize
+
 from src.features.thinning import zhangSuen
 from src.utils.utils import *
 from ..segmentation.line_segmentor import LineSegmentor
@@ -310,13 +312,11 @@ class FeatureExtractor:
     def get_gmm_writer_features(self, sliding_window_width):
         # Loop over each line.
         lines_feauters = []
-        splited_lines = []
-        # for idx, line in enumerate(self.bin_lines):
-        #     x = line.copy()
-        #     splited_lines.extend([line[:, 0:line.shape[1] // 2], line[:, line.shape[1] // 2:line.shape[1]]])
         for idx, line in enumerate(self.bin_lines):
+            # for idx, line in enumerate(self.bin_lines):
             # Apply thinning algorithm.
-            # skeleton_image = zhangSuen(line)
+            # skeleton_image = skeletonize(line)
+
 
             # Features
             windows_features = []
