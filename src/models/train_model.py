@@ -51,7 +51,7 @@ class GMMModel:
 
     def get_writers_models(self):
         for writer_id, writer_features in self.writers_features.items():
-            self.writers_models[writer_id] = GaussianMixture(n_components=len(writer_features),
+            self.writers_models[writer_id] = GaussianMixture(n_components=7,
                                                              covariance_type='diag', tol=0.001, reg_covar=1e-06,
                                                              max_iter=100, n_init=1,
                                                              init_params='kmeans', weights_init=None, means_init=None,
@@ -71,12 +71,10 @@ class GMMModel:
 
         return self.writers_probs
 
-    def evaluate(self):
+    def evaluate(self, t):
         correct = []
         # Loop over all writers.
         for writer_id, writer_features in self.writers_features.items():
-            max_prob = -1000
-            pred_writer_id = -1
             # Predict each line whether it belongs to which writer.
             lines_probabilities = []
             idx = {}
@@ -84,13 +82,10 @@ class GMMModel:
             for key in self.writers_models.keys():
                 idx[i] = key
                 i += 1
-                probabilities = self.writers_models[key].predict(np.reshape(writer_features, (len(writer_features), 7)))
-                lines_probabilities.append(np.log2(probabilities))
+                probabilities = self.writers_models[key].score(np.reshape(writer_features, (len(writer_features), 7)))
+                lines_probabilities.append(probabilities)
 
-            lines_probabilities = np.asarray(lines_probabilities).reshape(
-                (len(lines_probabilities), len(lines_probabilities[0])))
-
-            predictions = [idx[k] for k in np.argmax(lines_probabilities, axis=0)]
-            correct.extend([j == writer_id for j in predictions])
+            predictions = idx[np.argmax(lines_probabilities)]
+            correct.append(predictions == writer_id)
 
         return np.mean(correct)
