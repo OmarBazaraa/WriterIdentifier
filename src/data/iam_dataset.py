@@ -27,8 +27,7 @@ class IAMLoader:
                        552,
                        588,
                        635,
-                       670,
-                       671]
+                       670]
 
     @staticmethod
     def generate_processed_data():

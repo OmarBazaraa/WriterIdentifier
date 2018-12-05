@@ -20,12 +20,13 @@ if GENERATE_PRE_PROCESSED_DATA:
 features = []
 labels = []
 writers_features = {}
+test_writer_features = {}
 
 # Read labels.
 s = open(IAMLoader.processed_data_writer_ids, 'r').read()
 writers_labels = ast.literal_eval(s)
-
 # Walk on data set directory
+count = {}
 for root, dirs, files in os.walk(IAMLoader.processed_data_images_path + "/gray/"):
     #
     # Loop on every file in the directory.
@@ -39,6 +40,15 @@ for root, dirs, files in os.walk(IAMLoader.processed_data_images_path + "/gray/"
         writer_id = writers_labels[filename]
 
         if writer_id not in IAMLoader.top_writers_ids:
+            continue
+
+        if writer_id not in count.keys():
+            count[writer_id] = 0
+
+        if writer_id not in test_writer_features.keys():
+            test_writer_features[writer_id] = []
+
+        if len(test_writer_features[writer_id]) > 0 and count[writer_id] >= 2:
             continue
 
         # Print image name.
@@ -55,7 +65,14 @@ for root, dirs, files in os.walk(IAMLoader.processed_data_images_path + "/gray/"
         f = FeatureExtractor(org_img, gray_img, bin_img).extract()
         if writer_id not in writers_features.keys():
             writers_features[writer_id] = []
-        writers_features[writer_id].extend(f)
+        if count[writer_id] < 2:
+            writers_features[writer_id].extend(f)
+            count[writer_id] += 1
+        else:
+            if writer_id not in test_writer_features.keys():
+                test_writer_features[writer_id] = []
+            if len(test_writer_features[writer_id]) == 0:
+                test_writer_features[writer_id].extend(f)
 
         feature_extraction_elapsed_time += (time.clock() - feature_extraction_start)
 
@@ -77,14 +94,15 @@ gmm_model = GMMModel(writers_features)
 start_training_time = time.clock()
 gmm_model.get_writers_models()
 end_training_time = time.clock()
-validation_accuracy = gmm_model.evaluate()
+(training_accuracy, validation_accuracy) = gmm_model.evaluate(test_writer_features)
 
 # Get finish running time.
 finish_time = time.clock()
 
 # Print statistics.
 print("Processed ", len(labels), " images.")
-print("Accuracy rate: ", validation_accuracy, '%')
+print("Train Accuracy rate: ", training_accuracy, '%')
+print("Validation Accuracy rate: ", validation_accuracy, '%')
 print("Feature extraction elapsed time: %.2f seconds" % feature_extraction_elapsed_time)
 print("Training elapsed time: %.2f seconds" % (end_training_time - start_training_time))
 print("This took %.2f seconds" % (finish_time - start_time))

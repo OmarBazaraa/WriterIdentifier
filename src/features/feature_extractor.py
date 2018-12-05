@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 
 # from ..segmentation.word_segmentor import WordSegmentor
 # from sklearn.neighbors import KernelDensity
+from skimage.morphology import skeletonize
+
 from src.features.thinning import zhangSuen
 from src.utils.utils import *
 from ..segmentation.line_segmentor import LineSegmentor
@@ -310,9 +312,11 @@ class FeatureExtractor:
     def get_gmm_writer_features(self, sliding_window_width):
         # Loop over each line.
         lines_feauters = []
-        for line in self.bin_lines:
+        for idx, line in enumerate(self.bin_lines):
+            # for idx, line in enumerate(self.bin_lines):
             # Apply thinning algorithm.
-            skeleton_image = zhangSuen(line)
+            # skeleton_image = skeletonize(line)
+
 
             # Features
             windows_features = []
@@ -320,7 +324,7 @@ class FeatureExtractor:
             # For every column of pixels apply the sliding window.
             t = time.clock()
             x = []
-            for i in range(0, (line.shape[1] - sliding_window_width), sliding_window_width):
+            for i in range(0, (line.shape[1] - sliding_window_width), 1):
                 x.append(i)
                 t = time.clock()
                 window_features = []
@@ -363,6 +367,8 @@ class FeatureExtractor:
                 window_features.extend([num_black_pixels, up, lw])
                 window_features.extend(centre_of_gravity)
                 window_features.extend(second_order_moments)
+
+                # Calculate the number of black pixels between the upper and the lower contour
 
                 # Append to windows_features.
                 windows_features.append(window_features)
