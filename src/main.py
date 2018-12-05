@@ -35,7 +35,7 @@ for root, dirs, files in os.walk(IAMLoader.processed_data_images_path + "/gray/"
         # Ignore gitignore file.
         if filename[0] == '.' or filename in IAMLoader.images_of_interest:
             continue
-
+        IMAGES_PER_WRTIER = 2
         # Get writer id.
         writer_id = writers_labels[filename]
 
@@ -48,8 +48,8 @@ for root, dirs, files in os.walk(IAMLoader.processed_data_images_path + "/gray/"
         if writer_id not in test_writer_features.keys():
             test_writer_features[writer_id] = []
 
-        if len(test_writer_features[writer_id]) > 0 and count[writer_id] >= 2:
-            continue
+        # if len(test_writer_features[writer_id]) > 0 and count[writer_id] >= IMAGES_PER_WRTIER:
+        #     continue
 
         # Print image name.
         print(filename, writer_id)
@@ -65,14 +65,14 @@ for root, dirs, files in os.walk(IAMLoader.processed_data_images_path + "/gray/"
         f = FeatureExtractor(org_img, gray_img, bin_img).extract()
         if writer_id not in writers_features.keys():
             writers_features[writer_id] = []
-        if count[writer_id] < 2:
+        if count[writer_id] < IMAGES_PER_WRTIER:
             writers_features[writer_id].extend(f)
             count[writer_id] += 1
         else:
             if writer_id not in test_writer_features.keys():
                 test_writer_features[writer_id] = []
-            if len(test_writer_features[writer_id]) == 0:
-                test_writer_features[writer_id].extend(f)
+
+            test_writer_features[writer_id].append(f)
 
         feature_extraction_elapsed_time += (time.clock() - feature_extraction_start)
 

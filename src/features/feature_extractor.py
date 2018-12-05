@@ -311,12 +311,12 @@ class FeatureExtractor:
     # For GMM Model features.
     def get_gmm_writer_features(self, sliding_window_width):
         # Loop over each line.
-        lines_feauters = []
+        line_features = []
         for idx, line in enumerate(self.bin_lines):
             # for idx, line in enumerate(self.bin_lines):
             # Apply thinning algorithm.
-            # skeleton_image = skeletonize(line)
-
+            skeleton = skeletonize(line // 255)
+            line = np.asarray(skeleton * 255, dtype=np.uint8)
 
             # Features
             windows_features = []
@@ -324,57 +324,71 @@ class FeatureExtractor:
             # For every column of pixels apply the sliding window.
             t = time.clock()
             x = []
-            for i in range(0, (line.shape[1] - sliding_window_width), 1):
+            for i in range(0, (line.shape[1] - sliding_window_width), sliding_window_width):
                 x.append(i)
-                t = time.clock()
+
                 window_features = []
                 # Get the window of image.
                 window = line[:, i:i + sliding_window_width]
 
-                # Get number of black pixels. F1
+                # Get number of black pixels. (F1)
                 num_black_pixels = cv.countNonZero(window)
 
                 # Find all contours in the line.
                 _, contours, hierarchy = cv.findContours(window, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)
-                # print("F1 ", time.clock() -t)
-                t = time.clock()
-                # Ignore window without any contours.
                 if len(contours) == 0:
                     continue
 
                 # Get the moments.
                 mu = [cv.moments(cnt, False) for cnt in contours]
 
-                # Calculate centre of gravity. F2
+                # Calculate centre of gravity. (F2)
                 centre_of_gravity = np.mean(
                     [(mu[i]['m10'] / (mu[i]['m00'] + 0.001), mu[i]['m01'] / (mu[i]['m00'] + 0.001)) for i in
                      range(len(mu))],
                     axis=0)
 
-                # Get the position of the upper and the lower contour. F3
+                # Get the position of the upper and the lower contour. (F3)
                 # x, y, w, h = cv.boundingRect(cnt).
                 rects = [cv.boundingRect(cnt) for cnt in contours]
-                up, lw = (np.min([rect[0] for rect in rects]), np.max([rect[0] for rect in rects]))
-                # print("F2 ", time.clock()-t)
-                t = time.clock()
-                # Calculate second order moments. F4
+                rect_top_positions = [rect[0] for rect in rects]
+                top_contour_idx = np.argmin(rect_top_positions)
+                bottom_contour_idx = np.argmax(rect_top_positions)
+                up_top, lw_top, up_bottom, lw_bottom = (rects[top_contour_idx][0],
+                                                        (rects[top_contour_idx][0] + rects[top_contour_idx][3]),
+                                                        rects[bottom_contour_idx][0],
+                                                        (rects[bottom_contour_idx][0] + rects[bottom_contour_idx][3]))
+
+                # Calculate second order moments. (F4)
                 second_order_moments = np.mean(
                     [(mu[i]['m02'], mu[i]['m20']) for i in
                      range(len(mu))],
                     axis=0)
 
-                # TODO add left features. F5, F6, F7, F8, F9.
-                window_features.extend([num_black_pixels, up, lw])
+                window_features.extend([num_black_pixels, up_top, lw_bottom])
                 window_features.extend(centre_of_gravity)
                 window_features.extend(second_order_moments)
 
-                # Calculate the number of black pixels between the upper and the lower contour
+                # Calculate the number of black pixels between the upper and the lower contour (F5)
+                if lw_top < up_bottom:
+                    window_features.append(cv.countNonZero(window[:, lw_top:up_bottom]))
+                else:
+                    window_features.append(0)
 
+                # Calculate the black to white transitions in the vertical direction. (F6)
+                # count_white = np.sum(window, axis=1)
+                # black_to_white_transitions = 0
+                # last_black = (count_white[0] > 0)
+                # for idx, j in enumerate(count_white):
+                #     if last_black != (j > 0):
+                #         black_to_white_transitions += 1
+                #         last_black = j > 0
+                # window_features.append(black_to_white_transitions)
+
+                # TODO add left feature. F8
                 # Append to windows_features.
                 windows_features.append(window_features)
 
-                # print("F3 ", time.clock() - t)
+            line_features.append(np.mean(windows_features, axis=0))
 
-            lines_feauters.append(np.mean(windows_features, axis=0))
-
-        return lines_feauters
+        return line_features
