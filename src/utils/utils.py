@@ -2,14 +2,6 @@ import cv2 as cv
 import numpy as np
 from sklearn.neighbors import KernelDensity
 
-# Make it true once to generate the pre processed images to save time.
-GENERATE_PRE_PROCESSED_DATA = False
-
-# Debugging flags.
-DEBUG_PARAGRAPH_SEGMENTATION = False
-DEBUG_LINE_SEGMENTATION = False
-DEGUB_THINNING_ALGORITHM = False
-
 
 def display_image(name: str, img: np.ndarray, wait: bool = True) -> None:
     """
@@ -38,6 +30,7 @@ def kde_sklearn(x, x_grid, bandwidth=0.2, **kwargs):
     """
     Kernel Density Estimation with Scikit-learn
     """
+
     kde_skl = KernelDensity(bandwidth=bandwidth, **kwargs)
     kde_skl.fit(x)
 

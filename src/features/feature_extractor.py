@@ -4,17 +4,16 @@ import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
 
-# from ..segmentation.word_segmentor import WordSegmentor
 # from sklearn.neighbors import KernelDensity
 from skimage.morphology import skeletonize
 
 from src.features.thinning import zhangSuen
 from src.utils.utils import *
-from ..segmentation.line_segmentor import LineSegmentor
+from src.utils.constants import *
+from src.segmentation.line_segmentor import LineSegmentor
 
 
 class FeatureExtractor:
-
     def __init__(self, img, gray_img, bin_img):
         """
         Constructs a new feature extractor object for the given handwritten paragraph.

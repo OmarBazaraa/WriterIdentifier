@@ -10,7 +10,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import skimage.io as io
 
-from src.utils.utils import DEGUB_THINNING_ALGORITHM
+from src.utils.constants import *
 
 def neighbours(x, y, image):
     "Return 8-neighbours of image point P1(x,y), in a clockwise order"
@@ -60,7 +60,7 @@ def zhangSuen(image):
             Image_Thinned[x][y] = 0
 
     "Display the results"
-    if DEGUB_THINNING_ALGORITHM:
+    if DEBUG_THINNING_ALGORITHM:
         fig, ax = plt.subplots(1, 2)
         ax1, ax2 = ax.ravel()
         ax1.imshow(image, cmap=plt.cm.gray)

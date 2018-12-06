@@ -1,4 +1,5 @@
 opencv-python>=3.0
 numpy
 scikit-image
+sklearn
 matplotlib

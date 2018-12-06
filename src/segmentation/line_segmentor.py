@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from src.utils.utils import *
+from src.utils.constants import *
 
 
 class LineSegmentor:
