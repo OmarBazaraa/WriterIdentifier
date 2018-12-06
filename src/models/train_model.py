@@ -41,7 +41,7 @@ class Classifier:
 
 
 class GMMModel:
-    COUNT_FEATURES = 8
+    COUNT_FEATURES = 10
 
     def __init__(self, writers_features):
         # Create a gmm model for each writer.

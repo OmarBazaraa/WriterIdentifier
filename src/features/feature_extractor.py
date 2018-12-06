@@ -262,8 +262,8 @@ class FeatureExtractor:
     #####################################################################
 
     @staticmethod
-    def get_lower_upper_baselines(gray_line, bin_line):
-        height, width = gray_line.shape
+    def get_lower_upper_baselines(bin_line):
+        height, width = bin_line.shape
 
         hist = np.sum(bin_line, axis=1, dtype=int) // 255
         total_black_pixels_count = np.sum(bin_line, dtype=int) // 255
@@ -302,10 +302,10 @@ class FeatureExtractor:
 
         # print('Iterations:', iterations)
 
-        img = cv.cvtColor(gray_line, cv.COLOR_GRAY2BGR)
-        cv.line(img, (0, upper_baseline), (width, upper_baseline), (0, 0, 255), 2)
-        cv.line(img, (0, lower_baseline), (width, lower_baseline), (0, 0, 255), 2)
-        display_image('Base lines', img, True)
+        # img = cv.cvtColor(gray_line, cv.COLOR_GRAY2BGR)
+        # cv.line(img, (0, upper_baseline), (width, upper_baseline), (0, 0, 255), 2)
+        # cv.line(img, (0, lower_baseline), (width, lower_baseline), (0, 0, 255), 2)
+        # display_image('Base lines', img, True)
 
         return upper_baseline, lower_baseline
 
@@ -363,7 +363,9 @@ class FeatureExtractor:
         # Loop over each line.
         line_features = []
         for idx, line in enumerate(self.bin_lines):
-            # for idx, line in enumerate(self.bin_lines):
+            # Get upper and lower baselines.
+            upper_base_line, lower_base_line = self.get_lower_upper_baselines(line)
+
             # Apply thinning algorithm.
             skeleton = skeletonize(line // 255)
             line = np.asarray(skeleton * 255, dtype=np.uint8)
@@ -424,6 +426,10 @@ class FeatureExtractor:
                     window_features.append(cv.countNonZero(window[:, lw_top:up_bottom]))
                 else:
                     window_features.append(0)
+
+                # Add upper and lower baseline.
+                window_features.append(upper_base_line)
+                window_features.append(lower_base_line)
 
                 # Calculate the black to white transitions in the vertical direction. (F6)
                 # count_white = np.sum(window, axis=1)
