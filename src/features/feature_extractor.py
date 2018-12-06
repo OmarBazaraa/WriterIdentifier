@@ -47,7 +47,8 @@ class FeatureExtractor:
         # self.features.append(self.average_line_height())
         # self.features.extend(self.average_writing_width())
         # self.features.extend(self.average_contours_properties())
-        self.features.extend(self.get_gmm_writer_features(14))
+        # self.features.extend(self.get_gmm_writer_features(14))
+        self.features.extend(self.lbp_histogram())
 
         return self.features
 
@@ -152,6 +153,56 @@ class FeatureExtractor:
 
         # Return writing width features.
         return median_run, space_width
+
+    #####################################################################
+
+    def lbp_histogram(self):
+        hist = np.zeros(256)
+
+        total_black_pixels_count = np.sum(self.bin_img) // 255
+
+        for i in range(len(self.bin_lines)):
+            f = FeatureExtractor.get_lbp_vector(self.gray_lines[i], self.bin_lines[i])
+            hist = np.add(hist, f)
+
+        hist /= total_black_pixels_count
+
+        # plt.figure()
+        # plt.plot(list(range(len(hist))), hist)
+        # plt.show()
+
+        return hist
+
+    @staticmethod
+    def get_lbp_vector(gray_line, bin_line):
+        #
+        height, width = gray_line.shape
+
+        hist = np.zeros(256)
+
+        dx = [0, 1, 1, 1, 0, -1, -1, -1]
+        dy = [1, 1, 0, -1, -1, -1, 0, 1]
+
+        for i in range(height):
+            for j in range(width):
+                if bin_line[i][j] == 0:
+                    continue
+
+                v = 0
+
+                for k in range(8):
+                    to_i, to_j = i + dy[k], j + dx[k]
+
+                    if 0 <= to_i < height and 0 <= to_j < width:
+                        p = gray_line[i][j]
+                        q = gray_line[to_i][to_j]
+
+                        if p > q:
+                            v |= (1 << k)
+
+                hist[v] += 1
+
+        return hist
 
     #####################################################################
 
