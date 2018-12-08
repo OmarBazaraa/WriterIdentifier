@@ -2,13 +2,11 @@ import os
 import time
 import ast
 
-
 from src.features.feature_extractor import FeatureExtractor
 from src.models.train_model import *
 from src.utils.utils import *
 from src.utils.constants import *
 from src.data.iam_dataset import IAMLoader
-
 
 # Set timers.
 start_time = time.clock()
@@ -16,7 +14,6 @@ feature_extraction_elapsed_time = 0.0
 training_elapsed_time = 0.0
 
 # Data set (i.e. lists of features and labels).
-features = []
 labels = []
 writers_features = {}
 test_writer_features = {}
@@ -91,22 +88,38 @@ for root, dirs, files in os.walk(IAMLoader.processed_data_form_gray_path):
     # Break in order not to enter other dirs in the data/raw/form folder.
     break
 
-#
 # Train and evaluate the classifier using its test set.
-#
-training_elapsed_time = time.clock()
-gmm_model = GMMModel(writers_features)
-gmm_model.get_writers_models()
-training_elapsed_time = (time.clock() - training_elapsed_time)
-(training_accuracy, validation_accuracy) = gmm_model.evaluate(test_writer_features)
 
-#
+# training_elapsed_time = time.clock()
+# gmm_model = GMMModel(writers_features)
+# gmm_model.get_writers_models()
+# training_elapsed_time = (time.clock() - training_elapsed_time)
+# (training_accuracy, validation_accuracy) = gmm_model.evaluate(test_writer_features)
+
 # Pass features and labels to a model for training.
 #
 # training_elapsed_time = time.clock()
-# classifier = Classifier('mlp', features, labels)
-# classifier.train()
-# training_elapsed_time = (time.clock() - training_elapsed_time)
+
+
+# SVM Classifier.
+f = []
+l = []
+f_t = []
+l_t = []
+for key, value in writers_features.items():
+    for i in value:
+        f.append(i)
+        l.append(key)
+
+for key, value in test_writer_features.items():
+    for i in value:
+        f_t.extend(i)
+        l_t.append(key)
+
+classifier = Classifier('svm', f, l, f_t, l_t)
+classifier.train()
+training_elapsed_time = (time.clock() - training_elapsed_time)
+validation_accuracy = classifier.evaluate()
 
 # Get finish running time.
 finish_time = time.clock()
@@ -115,7 +128,7 @@ finish_time = time.clock()
 # Print statistics.
 #
 print("Processed ", len(labels), " images.")
-print("Train Accuracy rate: ", training_accuracy, '%')
+# print("Train Accuracy rate: ", training_accuracy, '%')
 print("Validation Accuracy rate: ", validation_accuracy, '%')
 print("Feature extraction elapsed time: %.2f seconds" % feature_extraction_elapsed_time)
 print("Training elapsed time: %.2f seconds" % training_elapsed_time)

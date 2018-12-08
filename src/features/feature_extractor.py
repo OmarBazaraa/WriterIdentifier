@@ -48,7 +48,7 @@ class FeatureExtractor:
         # self.features.extend(self.average_writing_width())
         # self.features.extend(self.average_contours_properties())
         # self.features.extend(self.get_gmm_writer_features(14))
-        self.features.extend(self.lbp_histogram())
+        self.features.append(self.lbp_histogram())
 
         return self.features
 

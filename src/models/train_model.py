@@ -6,14 +6,17 @@ from sklearn.neural_network import MLPClassifier as mlp
 
 
 class Classifier:
-    def __init__(self, mtype, x, y):
+    def __init__(self, mtype, x, y, x_test = None, y_test = None):
         # TODO modify these parameters
         if mtype == 'svm':
             self.model = svm.SVC(C=1.0)
         elif mtype == 'mlp':
             self.model = mlp(solver='sgd', activation='logistic', alpha=1e-5, hidden_layer_sizes=(5,), random_state=1)
 
-        self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(x, y)
+        # self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(x, y)
+        # Make it take only one image for each of the 2 writers writer
+        self.x_train, self.x_test, self.y_train, self.y_test = x, x_test, y, y_test
+
 
         # Save the writers read used in case of not using the full dataset.
         self.train_writers = set(self.y_train)
