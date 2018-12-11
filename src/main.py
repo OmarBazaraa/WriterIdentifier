@@ -241,7 +241,6 @@ if __name__ == '__main__':
     # Evaluate SVM model.
     # (two_writers_svm_acc, three_writers_svm_acc) = evaluate_all_combinations_svm(writers_features,
     #                                                                              test_writers_features)
-
     # Print statistics.
     print("Processed ", processed_images_count, " images.")
     print("GMM 2 writers validation accuracy: ", two_writers_gmm_acc)

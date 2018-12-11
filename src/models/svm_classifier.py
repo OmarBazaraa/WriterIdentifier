@@ -35,6 +35,6 @@ class Classifier:
             if writer not in self.train_writers:
                 not_found_writers_count += 1
 
-        print(correct_pred, len(self.y_test), not_found_writers_count)
+        # print(correct_pred, len(self.y_test), not_found_writers_count)
 
         return correct_pred / (len(self.y_test) - not_found_writers_count) * 100
