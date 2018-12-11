@@ -7,11 +7,8 @@ class GMMModel:
 
     def __init__(self, writers_features):
         # Create a gmm model for each writer.
-
-        # Save the writers read used in case of not using the full dataset.
         self.writers_models = {}
         self.writers_features = writers_features
-        self.writers_probs = {}
 
     def get_writers_models(self):
         for writer_id, writer_features in self.writers_features.items():
@@ -27,21 +24,24 @@ class GMMModel:
 
         return self.writers_models
 
-    def predict(self, x):
-        self.writers_probs = {}
+    def predict(self, features):
+        predictions = []
+        idx_id_dic = {}
+        i = 0
         for writer_id, writer_model in self.writers_models.items():
-            # Predict and save the probability.
-            self.writers_probs[writer_id] = writer_model.predict(x)
+            idx_id_dic[writer_id] = i
+            i += 1
+            predictions.append(writer_model.predict(features))
 
-        return self.writers_probs
+        return idx_id_dic[np.argmax(predictions)]
 
     def evaluate(self, t):
-        correct = []
+        predictions = []
         # Loop over all writers.
         for writer_id, writer_features in t.items():
             for image_features in writer_features:
                 # Predict each line whether it belongs to which writer.
-                lines_probabilities = []
+                image_probabilities = []
                 idx = {}
                 i = 0
                 for key in self.writers_models.keys():
@@ -49,8 +49,8 @@ class GMMModel:
                     i += 1
                     probabilities = self.writers_models[key].score(
                         np.reshape(image_features, (len(image_features), GMMModel.COUNT_FEATURES)))
-                    lines_probabilities.append(probabilities)
-                predictions = idx[np.argmax(lines_probabilities)]
-                correct.append(predictions == writer_id)
+                    image_probabilities.append(probabilities)
+                predictions = idx[np.argmax(image_probabilities)]
+                predictions.append(predictions == writer_id)
 
-        return np.mean(correct)
+        return np.mean(predictions)
