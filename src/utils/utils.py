@@ -24,17 +24,3 @@ def display_image(name: str, img: np.ndarray, wait: bool = True) -> None:
     if wait:
         cv.waitKey(0)
         cv.destroyAllWindows()
-
-
-def kde_sklearn(x, x_grid, bandwidth=0.2, **kwargs):
-    """
-    Kernel Density Estimation with Scikit-learn
-    """
-
-    kde_skl = KernelDensity(bandwidth=bandwidth, **kwargs)
-    kde_skl.fit(x)
-
-    # score_samples() returns the log-likelihood of the samples.
-    log_pdf = kde_skl.score_samples(x_grid)
-
-    return np.exp(log_pdf)

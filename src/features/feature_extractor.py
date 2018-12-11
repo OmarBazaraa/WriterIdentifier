@@ -1,13 +1,9 @@
 import time
-
 import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
-
-# from sklearn.neighbors import KernelDensity
 from skimage.morphology import skeletonize
 
-from src.features.thinning import zhangSuen
 from src.utils.utils import *
 from src.utils.constants import *
 from src.segmentation.line_segmentor import LineSegmentor
@@ -47,8 +43,8 @@ class FeatureExtractor:
         # self.features.append(self.average_line_height())
         # self.features.extend(self.average_writing_width())
         # self.features.extend(self.average_contours_properties())
-        # self.features.extend(self.get_gmm_writer_features(14))
-        self.features.append(self.lbp_histogram())
+        self.features.extend(self.get_gmm_writer_features(14))
+        # self.features.append(self.lbp_histogram())
 
         return self.features
 
@@ -311,60 +307,13 @@ class FeatureExtractor:
 
     #####################################################################
 
-    def horizontal_run_length(self):
-        """
-        WIP
-        Get the horizontal run length feature given binary lines.
-        :return:    a pdf representing the horizontal run length.
-        """
-        freq = np.zeros((1000,))
-
-        # Calculate the frequency.
-        for line in self.bin_lines:
-            a = np.asarray(line).copy()
-            # Swap white with black.
-            a[a == 0] = 3
-            a[a == 1] = 0
-            a[a == 3] = 1
-            line_freq, bins = np.histogram(np.sum(a, axis=1), bins=1000, density=True)
-            freq += line_freq
-
-        return np.argmax(freq)
-
-    def vertical_run_length(self):
-        """
-        WIP
-        Get the vertical run length feature given binary lines.
-        :return:    a pdf representing the horizontal run length.
-        """
-        freq = np.zeros((1000,))
-
-        # Calculate the frequency.
-        for line in self.bin_lines:
-            a = np.asarray(line).copy()
-            # Swap white with black.
-            a[a == 0] = 3
-            a[a == 1] = 0
-            a[a == 3] = 1
-            line_freq, bins = np.histogram(np.sum(a, axis=0), bins=1000, density=True)
-            freq += line_freq
-
-        return np.argmax(freq)
-
-    #####################################################################
-
-    def get_slant(self):
-        return None
-
-    #####################################################################
-
     # For GMM Model features.
     def get_gmm_writer_features(self, sliding_window_width):
         # Loop over each line.
         line_features = []
         for idx, line in enumerate(self.bin_lines):
             # Get upper and lower baselines.
-            upper_base_line, lower_base_line = self.get_lower_upper_baselines(line)
+            # upper_base_line, lower_base_line = self.get_lower_upper_baselines(line)
 
             # Apply thinning algorithm.
             skeleton = skeletonize(line // 255)
@@ -428,8 +377,8 @@ class FeatureExtractor:
                     window_features.append(0)
 
                 # Add upper and lower baseline.
-                window_features.append(upper_base_line)
-                window_features.append(lower_base_line)
+                # window_features.append(upper_base_line)
+                # window_features.append(lower_base_line)
 
                 # Calculate the black to white transitions in the vertical direction. (F6)
                 # count_white = np.sum(window, axis=1)
