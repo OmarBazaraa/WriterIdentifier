@@ -36,7 +36,7 @@ class GMMModel:
         return idx_id_dic[np.argmax(predictions)]
 
     def evaluate(self, t):
-        predictions = []
+        classification = []
         # Loop over all writers.
         for writer_id, writer_features in t.items():
             for image_features in writer_features:
@@ -50,7 +50,7 @@ class GMMModel:
                     probabilities = self.writers_models[key].score(
                         np.reshape(image_features, (len(image_features), GMMModel.COUNT_FEATURES)))
                     image_probabilities.append(probabilities)
-                predictions = idx[np.argmax(image_probabilities)]
-                predictions.append(predictions == writer_id)
+                prediction = idx[np.argmax(image_probabilities)]
+                classification.append(prediction == writer_id)
 
-        return np.mean(predictions)
+        return np.mean(classification)
