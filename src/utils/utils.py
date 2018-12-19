@@ -1,3 +1,5 @@
+import os
+import shutil
 import cv2 as cv
 import numpy as np
 
@@ -23,3 +25,18 @@ def display_image(name: str, img: np.ndarray, wait: bool = True) -> None:
     if wait:
         cv.waitKey(0)
         cv.destroyAllWindows()
+
+
+def copy_file(src: str, dst: str) -> None:
+    """
+    Copies a file from its source path to the new given destination.
+    
+    :param src: the source path of the file.
+    :param dst: the destination path of the file.
+    """
+    directory = os.path.dirname(dst)
+
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    shutil.copyfile(src, dst)

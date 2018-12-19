@@ -1,3 +1,6 @@
+#
+GENERATE_TEST_ITERATIONS = False
+
 # Make it true once to generate the pre processed images to save time.
 GENERATE_PRE_PROCESSED_DATA = False
 

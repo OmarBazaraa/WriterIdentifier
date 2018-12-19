@@ -1,12 +1,14 @@
 import os
 import time
 
+from src.data.test_generator import TestGenerator
 from src.pre_processing.pre_processor import PreProcessor
 from src.segmentation.line_segmentor import LineSegmentor
 from src.features.feature_extractor import FeatureExtractor
 from src.models.svm_classifier import Classifier
 from src.utils.utils import *
 from src.utils.constants import *
+
 
 #
 # Paths
@@ -83,6 +85,13 @@ def get_writing_features(image_path):
     gray_img, bin_img = PreProcessor.process(org_img, image_path)
     return FeatureExtractor(org_img, gray_img, bin_img).extract()
 
+
+#
+# Generate test iterations from IAM data set
+#
+if GENERATE_TEST_ITERATIONS:
+    gen = TestGenerator()
+    gen.generate(data_path, 100, 3, 2)
 
 #
 # Main
