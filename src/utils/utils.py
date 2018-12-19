@@ -1,6 +1,5 @@
 import cv2 as cv
 import numpy as np
-from sklearn.neighbors import KernelDensity
 
 
 def display_image(name: str, img: np.ndarray, wait: bool = True) -> None:
