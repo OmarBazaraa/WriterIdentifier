@@ -110,7 +110,7 @@ def calculate_accuracy():
 #
 if GENERATE_TEST_ITERATIONS:
     gen = TestGenerator()
-    gen.generate(data_path, 3, 3, 2)
+    gen.generate(data_path, 20, 3, 2)
 
 #
 # Main
@@ -120,7 +120,7 @@ run()
 elapsed_time = (time.time() - start)
 results_file.close()
 time_file.close()
-acc = calculate_accuracy() * 100
+acc = calculate_accuracy() * 100    # TODO: to be removed before discussion
 print('Total elapsed time: %.2f seconds' % elapsed_time)
 print('Classification accuracy: %.2f' % acc)
 
