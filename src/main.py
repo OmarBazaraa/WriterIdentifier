@@ -15,6 +15,7 @@ from src.utils.constants import *
 data_path = '../data/data/'
 results_path = '../data/results.txt'
 time_path = '../data/time.txt'
+expected_results_path = data_path + 'output.txt'
 
 #
 # Files
@@ -24,6 +25,9 @@ time_file = open(time_path, 'w')
 
 
 def run():
+    results_file = open(results_path, 'w')
+    time_file = open(time_path, 'w')
+
     for root, dirs, files in os.walk(data_path):
         for d in dirs:
             print('Running test iteration', d, '...')
@@ -64,8 +68,8 @@ def process_test_iteration(path):
     print('    Finished in %.2f seconds' % t)
 
     # Write the results
-    results_file.write(str(r))
-    time_file.write(str(t))
+    results_file.write(str(r) + '\n')
+    time_file.write(str(t) + '\n')
 
 
 def process_writer(path, writer_id):
@@ -85,6 +89,22 @@ def get_writing_features(image_path):
     return FeatureExtractor(org_img, gray_img, bin_img).extract()
 
 
+def calculate_accuracy():
+    # Read results
+    with open(results_path) as f:
+        predicted_res = f.read().splitlines()
+    with open(expected_results_path) as f:
+        expected_res = f.read().splitlines()
+
+    # Calculate accuracy
+    cnt = 0
+    for i in range(len(predicted_res)):
+        if predicted_res[i] == expected_res[i]:
+            cnt += 1
+
+    return cnt / len(predicted_res)
+
+
 #
 # Generate test iterations from IAM data set
 #
@@ -100,4 +120,7 @@ run()
 elapsed_time = (time.time() - start)
 results_file.close()
 time_file.close()
+acc = calculate_accuracy() * 100
 print('Total elapsed time: %.2f seconds' % elapsed_time)
+print('Classification accuracy: %.2f' % acc)
+

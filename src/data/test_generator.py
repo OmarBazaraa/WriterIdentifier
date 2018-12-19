@@ -57,6 +57,11 @@ class TestGenerator:
         :param k: number of images per writer per test iteration.
         """
 
+        # Delete old test iterations
+        if os.path.exists(path):
+            shutil.rmtree(path)
+        os.makedirs(path)
+
         # Open output file to write the expected results of the test iterations
         self.output_file = open(path + 'output.txt', 'w')
 
@@ -120,5 +125,5 @@ class TestGenerator:
         copy_file(src_img, dst_img)
 
         # Write expected writer
-        self.output_file.write(str(used_writers[w]))
+        self.output_file.write(str(used_writers[w]) + '\n')
 
