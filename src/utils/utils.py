@@ -34,6 +34,7 @@ def copy_file(src: str, dst: str) -> None:
     :param src: the source path of the file.
     :param dst: the destination path of the file.
     """
+
     directory = os.path.dirname(dst)
 
     if not os.path.exists(directory):

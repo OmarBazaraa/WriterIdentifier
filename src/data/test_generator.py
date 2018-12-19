@@ -8,6 +8,7 @@ class TestGenerator:
 
     writers = {}
     writers_ids = []
+    output_file = None
 
     def __init__(self):
         # Read IAM meta data file
@@ -55,11 +56,18 @@ class TestGenerator:
         :param m: number of writers per test iteration.
         :param k: number of images per writer per test iteration.
         """
+
+        # Open output file to write the expected results of the test iterations
+        self.output_file = open(path + 'output.txt', 'w')
+
         # Generate the n test iterations
         for i in range(n):
             print('Generating test iteration', i, '...')
             test_path = path + format(i, '03d') + '/'
             self.generate_test(test_path, m, k)
+
+        # Close output file
+        self.output_file.close()
 
     def generate_test(self, path, m, k):
         used_writers = {}
@@ -112,7 +120,5 @@ class TestGenerator:
         copy_file(src_img, dst_img)
 
         # Write expected writer
-        file = open(path + 'output.txt', 'w')
-        file.write(str(used_writers[w]))
-        file.close()
+        self.output_file.write(str(used_writers[w]))
 

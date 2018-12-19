@@ -3,7 +3,6 @@ import time
 
 from src.data.test_generator import TestGenerator
 from src.pre_processing.pre_processor import PreProcessor
-from src.segmentation.line_segmentor import LineSegmentor
 from src.features.feature_extractor import FeatureExtractor
 from src.models.svm_classifier import Classifier
 from src.utils.utils import *
@@ -91,7 +90,7 @@ def get_writing_features(image_path):
 #
 if GENERATE_TEST_ITERATIONS:
     gen = TestGenerator()
-    gen.generate(data_path, 100, 3, 2)
+    gen.generate(data_path, 3, 3, 2)
 
 #
 # Main
