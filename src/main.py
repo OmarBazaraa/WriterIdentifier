@@ -1,4 +1,3 @@
-import os
 import time
 
 from src.data.test_generator import TestGenerator
@@ -23,11 +22,13 @@ expected_results_path = data_path + 'output.txt'
 results_file = open(results_path, 'w')
 time_file = open(time_path, 'w')
 
+#
+# Timers
+#
+feature_extraction_time = 0
+
 
 def run():
-    results_file = open(results_path, 'w')
-    time_file = open(time_path, 'w')
-
     for root, dirs, files in os.walk(data_path):
         for d in dirs:
             print('Running test iteration', d, '...')
@@ -85,8 +86,12 @@ def process_writer(path, writer_id):
 
 def get_writing_features(image_path):
     org_img = cv.imread(image_path, cv.IMREAD_GRAYSCALE)
-    gray_img, bin_img = PreProcessor.process(org_img, image_path)
-    return FeatureExtractor(org_img, gray_img, bin_img).extract()
+    gray_img, bin_img = PreProcessor.process(org_img)
+    t = time.time()
+    f = FeatureExtractor(org_img, gray_img, bin_img).extract()
+    t = (time.time() - t)
+    print('        Feature extraction time: %.2f seconds' % t)
+    return f
 
 
 def calculate_accuracy():
@@ -122,5 +127,6 @@ results_file.close()
 time_file.close()
 acc = calculate_accuracy() * 100    # TODO: to be removed before discussion
 print('Total elapsed time: %.2f seconds' % elapsed_time)
+print('Feature extraction elapsed time: %.2f seconds' % feature_extraction_time)
 print('Classification accuracy: %.2f' % acc)
 

@@ -8,11 +8,12 @@ from src.utils.constants import *
 
 class PreProcessor:
     @staticmethod
-    def process(gray_img: np.ndarray) -> (np.ndarray, np.ndarray):
+    def process(gray_img: np.ndarray, filename: str = 'img.png') -> (np.ndarray, np.ndarray):
         """
         Pre-processes the IAM form image and extracts the handwritten paragraph only.
 
         :param gray_img:    the IAM form image to be processed.
+        :param filename:    the filename of the image (needed only in debugging mode).
         :return:            pre-processed gray and binary images of the handwritten paragraph.
         """
 
@@ -28,19 +29,20 @@ class PreProcessor:
         thresh, bin_img = cv.threshold(gray_img, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU)
 
         # Crop page header and footer and keep only the handwritten area.
-        gray_img, bin_img = PreProcessor._crop_paragraph(gray_img, bin_img)
+        gray_img, bin_img = PreProcessor._crop_paragraph(gray_img, bin_img, filename)
 
         # Return pre processed images.
         return gray_img, bin_img
 
     @staticmethod
-    def _crop_paragraph(gray_img: np.ndarray, bin_img: np.ndarray) -> (np.ndarray, np.ndarray):
+    def _crop_paragraph(gray_img: np.ndarray, bin_img: np.ndarray, filename: str = 'img.png') -> (np.ndarray, np.ndarray):
         """
         Detects the bounding box of the handwritten paragraph of the given IAM form image
         and returns a cropped image of it.
 
         :param gray_img:    the IAM form image to be processed.
         :param bin_img:     binarized IAM form image to be processed.
+        :param filename:    the filename of the image (needed only in debugging mode).
         :return:            cropped gray and binary images of the handwritten paragraph.
         """
 
@@ -88,7 +90,7 @@ class PreProcessor:
             down -= 1
 
         # Give some padding to the paragraph.
-        padding = 5
+        padding = 10
         left -= padding
         up -= padding
         right += padding
@@ -103,6 +105,10 @@ class PreProcessor:
         # Crop images.
         gray_img = gray_img[up:down + 1, left:right + 1]
         bin_img = bin_img[up:down + 1, left:right + 1]
+
+        # Write the handwritten paragraph.
+        if DEBUG_PARAGRAPH_SEGMENTATION:
+            cv.imwrite("../data/output/" + filename, gray_img)
 
         # Return the handwritten paragraph
         return gray_img, bin_img
