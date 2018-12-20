@@ -25,7 +25,7 @@ time_file = open(time_path, 'w')
 #
 # Timers
 #
-feature_extraction_time = 0
+feature_extraction_time = 0.0
 
 
 def run():
@@ -90,6 +90,8 @@ def get_writing_features(image_path):
     t = time.time()
     f = FeatureExtractor(org_img, gray_img, bin_img).extract()
     t = (time.time() - t)
+    # FIXME: this line giving an error local variable 'feature_extraction_elapsed_time' referenced before assignment
+    # feature_extraction_time += t
     print('        Feature extraction time: %.2f seconds' % t)
     return f
 
