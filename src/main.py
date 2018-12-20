@@ -96,14 +96,14 @@ def process_test_iteration(path):
     # Should be 1 test image.
     for root, dirs, files in os.walk(path):
         for filename in files:
-            print('    Classifying test image', path + filename, '...')
             f = get_writing_features(path + filename)
             r = classifier.predict([f])[0]
+            print()
+            print('    Classifying test image \'%s\' as writer %d' % (path + filename, r))
             break
         break
 
-    # Print results
-    print('    Classified as writer %d', r)
+    # Return classification
     return r
 
 
@@ -161,7 +161,7 @@ def calculate_accuracy():
 #
 if GENERATE_TEST_ITERATIONS:
     gen = TestGenerator()
-    gen.generate(data_path, 100, 3, 2)
+    gen.generate(data_path, 200, 3, 2)
 
 #
 # Main
