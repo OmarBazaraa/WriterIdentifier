@@ -87,13 +87,6 @@ class PreProcessor:
         while down > up and hor_hist[down] == 0:
             down -= 1
 
-        # Give some padding to the paragraph.
-        padding = 5
-        left -= padding
-        up -= padding
-        right += padding
-        down += padding
-
         # Display bounding box on the handwritten paragraph.
         if DEBUG_PARAGRAPH_SEGMENTATION:
             img = cv.cvtColor(gray_img, cv.COLOR_GRAY2BGR)
