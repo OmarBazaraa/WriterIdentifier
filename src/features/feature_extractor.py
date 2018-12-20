@@ -2,10 +2,8 @@ import time
 import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.ndimage.interpolation import shift
 
 from src.utils.utils import *
-from src.utils.constants import *
 from src.segmentation.line_segmentor import LineSegmentor
 
 
@@ -70,9 +68,11 @@ class FeatureExtractor:
 
         # Loop over the 8 neighbors
         for i in range(8):
-            shifted_img = shift(img, (-dy[i], -dx[i]), cval=0)
-            res = img >= shifted_img
-            lbp |= (res.view(np.uint8) << i)
+            view_shf = FeatureExtractor.shift(img, (dy[i], dx[i]))
+            view_img = FeatureExtractor.shift(img, (-dy[i], -dx[i]))
+            view_lbp = FeatureExtractor.shift(lbp, (-dy[i], -dx[i]))
+            res = (view_img >= view_shf)
+            view_lbp |= (res.view(np.uint8) << i)
 
         # Calculate LBP histogram of only black pixels
         hist = cv.calcHist([lbp], [0], mask, [256], [0, 256])
@@ -80,3 +80,18 @@ class FeatureExtractor:
 
         return hist
 
+    @staticmethod
+    def shift(img, shift) -> np.ndarray:
+        r, c = shift[0], shift[1]
+
+        if r >= 0:
+            ret = img[r:, :]
+        else:
+            ret = img[0:r, :]
+
+        if c >= 0:
+            ret = ret[:, c:]
+        else:
+            ret = ret[:, 0:c]
+
+        return ret

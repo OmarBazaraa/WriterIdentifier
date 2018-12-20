@@ -19,22 +19,41 @@ expected_results_path = data_path + 'output.txt'
 #
 # Files
 #
-results_file = open(results_path, 'w')
-time_file = open(time_path, 'w')
+results_file = None
+time_file = None
 
 #
 # Timers
 #
+total_time = 0.0
 feature_extraction_time = 0.0
 
 
 def run():
+    # Set global variables
+    global results_file, time_file, total_time
+
+    # Start timer
+    start = time.time()
+
+    # Open results files
+    results_file = open(results_path, 'w')
+    time_file = open(time_path, 'w')
+
+    # Iterate on every test iteration
     for root, dirs, files in os.walk(data_path):
         for d in dirs:
             print('Running test iteration', d, '...')
             process_test_iteration(data_path + d + '/')
             print()
         break
+
+    # Close files
+    results_file.close()
+    time_file.close()
+
+    # End timer
+    total_time = (time.time() - start)
 
 
 def process_test_iteration(path):
@@ -85,14 +104,14 @@ def process_writer(path, writer_id):
 
 
 def get_writing_features(image_path):
+    global feature_extraction_time
     org_img = cv.imread(image_path, cv.IMREAD_GRAYSCALE)
     gray_img, bin_img = PreProcessor.process(org_img)
     t = time.time()
     f = FeatureExtractor(org_img, gray_img, bin_img).extract()
     t = (time.time() - t)
-    # FIXME: this line giving an error local variable 'feature_extraction_elapsed_time' referenced before assignment
-    # feature_extraction_time += t
-    print('        Feature extraction time: %.2f seconds' % t)
+    feature_extraction_time += t
+    # print('        Feature extraction time: %.2f seconds' % t)
     return f
 
 
@@ -108,6 +127,9 @@ def calculate_accuracy():
     for i in range(len(predicted_res)):
         if predicted_res[i] == expected_res[i]:
             cnt += 1
+        else:
+            print('Wrong classification in iteration:', format(i, '03d'))
+            print('Correct:', expected_res[i], ', ours:', predicted_res[i])
 
     return cnt / len(predicted_res)
 
@@ -117,18 +139,14 @@ def calculate_accuracy():
 #
 if GENERATE_TEST_ITERATIONS:
     gen = TestGenerator()
-    gen.generate(data_path, 20, 3, 2)
+    gen.generate(data_path, 50, 3, 2)
 
 #
 # Main
 #
-start = time.time()
 run()
-elapsed_time = (time.time() - start)
-results_file.close()
-time_file.close()
 acc = calculate_accuracy() * 100    # TODO: to be removed before discussion
-print('Total elapsed time: %.2f seconds' % elapsed_time)
+print('Total elapsed time: %.2f seconds' % total_time)
 print('Feature extraction elapsed time: %.2f seconds' % feature_extraction_time)
 print('Classification accuracy: %.2f' % acc)
 
