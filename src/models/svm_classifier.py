@@ -7,7 +7,7 @@ class Classifier:
     def __init__(self, mtype, x, y, x_test=None, y_test=None):
         # TODO modify these parameters
         if mtype == 'svm':
-            self.model = svm.SVC(C=1.0)
+            self.model = svm.SVC(C=1.0, gamma='scale')
         elif mtype == 'mlp':
             self.model = mlp(solver='sgd', activation='logistic', alpha=1e-5, hidden_layer_sizes=(5,), random_state=1)
 

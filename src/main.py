@@ -111,7 +111,6 @@ def get_writing_features(image_path):
     f = FeatureExtractor(org_img, gray_img, bin_img).extract()
     t = (time.time() - t)
     feature_extraction_time += t
-    # print('        Feature extraction time: %.2f seconds' % t)
     return f
 
 
@@ -127,9 +126,17 @@ def calculate_accuracy():
     for i in range(len(predicted_res)):
         if predicted_res[i] == expected_res[i]:
             cnt += 1
-        else:
-            print('Wrong classification in iteration:', format(i, '03d'))
-            print('Correct:', expected_res[i], ', ours:', predicted_res[i])
+
+    # Print accuracy
+    print('Classification accuracy: %d/%d' % (cnt, len(predicted_res)))
+    print('-------------------------------')
+    print()
+
+    # Print wrong classifications
+    for i in range(len(predicted_res)):
+        if predicted_res[i] != expected_res[i]:
+            print('Wrong classification in iteration: %s (output: %s, expected: %s)' %
+                  (format(i, '03d'), predicted_res[i], expected_res[i]))
 
     return cnt / len(predicted_res)
 
@@ -139,14 +146,14 @@ def calculate_accuracy():
 #
 if GENERATE_TEST_ITERATIONS:
     gen = TestGenerator()
-    gen.generate(data_path, 50, 3, 2)
+    gen.generate(data_path, 100, 3, 2)
 
 #
 # Main
 #
 run()
-acc = calculate_accuracy() * 100    # TODO: to be removed before discussion
+print('-------------------------------')
 print('Total elapsed time: %.2f seconds' % total_time)
 print('Feature extraction elapsed time: %.2f seconds' % feature_extraction_time)
-print('Classification accuracy: %.2f' % acc)
+acc = calculate_accuracy() * 100    # TODO: to be removed before discussion
 
