@@ -44,7 +44,7 @@ class FeatureExtractor:
         hist = np.zeros(256)
 
         for i in range(len(self.bin_lines)):
-            hist = FeatureExtractor.get_lbp_histogram(self.gray_lines[i], self.bin_lines[i])
+            hist = FeatureExtractor.get_lbp_histogram(self.gray_lines[i], self.bin_lines[i], hist, True)
 
         hist /= np.mean(hist)
 
@@ -55,7 +55,7 @@ class FeatureExtractor:
         return hist
 
     @staticmethod
-    def get_lbp_histogram(img, mask):
+    def get_lbp_histogram(img, mask, hist=None, acc=True):
         # Get image dimensions
         height, width = img.shape
 
@@ -75,7 +75,7 @@ class FeatureExtractor:
             view_lbp |= (res.view(np.uint8) << i)
 
         # Calculate LBP histogram of only black pixels
-        hist = cv.calcHist([lbp], [0], mask, [256], [0, 256])
+        hist = cv.calcHist([lbp], [0], mask, [256], [0, 256], hist, acc)
         hist = hist.ravel()
 
         return hist
