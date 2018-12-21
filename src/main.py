@@ -6,6 +6,7 @@ from sklearn.svm import SVC
 
 from src.data.test_generator import TestGenerator
 from src.pre_processing.pre_processor import PreProcessor
+from src.segmentation.line_segmentor import LineSegmentor
 from src.features.feature_extractor import FeatureExtractor
 from src.utils.utils import *
 from src.utils.constants import *
@@ -127,11 +128,15 @@ def process_writer(path, writer_id):
 
 def get_writing_features(image_path):
     global feature_extraction_time
-    org_img = cv.imread(image_path, cv.IMREAD_GRAYSCALE)
-    gray_img, bin_img = PreProcessor.process(org_img)
+
+    # Preprocessing
+    gray_img = cv.imread(image_path, cv.IMREAD_GRAYSCALE)
+    gray_img, bin_img = PreProcessor.process(gray_img)
+    gray_lines, bin_lines = LineSegmentor(gray_img, bin_img).segment()
+
+    # Feature extraction
     t = time.time()
-    f = FeatureExtractor(org_img, gray_img, bin_img).extract()
-    t = (time.time() - t)
+    f = FeatureExtractor(gray_lines, bin_lines).extract()
     feature_extraction_time += t
     return f
 

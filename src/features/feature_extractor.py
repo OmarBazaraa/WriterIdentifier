@@ -7,30 +7,23 @@ import matplotlib.pyplot as plt
 from skimage import feature
 
 from src.utils.utils import *
-from src.segmentation.line_segmentor import LineSegmentor
 
 
 class FeatureExtractor:
-    def __init__(self, img, gray_img, bin_img):
+    def __init__(self, gray_lines, bin_lines):
         """
         Constructs a new feature extractor object for the given handwritten paragraph.
 
-        :param img:         the original whole image.
-        :param gray_img:    the pre-processed cropped gray image of the handwritten paragraph.
-        :param bin_img:     the pre-processed cropped binary image of the handwritten paragraph.
+        :param gray_lines:  the pre-processed list of gray lines of the handwritten paragraph.
+        :param bin_lines:   the pre-processed list of binary lines of the handwritten paragraph.
         """
 
-        # Store references to the page images.
-        self.org_img = img
-        self.gray_img = gray_img
-        self.bin_img = bin_img
+        # Store references to the image lines.
+        self.gray_lines = gray_lines
+        self.bin_lines = bin_lines
 
         # Initialize features list.
         self.features = []
-
-        # Segment page into lines.
-        segmentor = LineSegmentor(gray_img, bin_img)
-        self.gray_lines, self.bin_lines = segmentor.segment()
 
     def extract(self):
         """
@@ -44,8 +37,6 @@ class FeatureExtractor:
         return self.features
 
     def lbp_histogram(self):
-        # hist = FeatureExtractor.get_lbp_histogram(self.gray_img, self.bin_img)
-
         hist = np.zeros(256)
 
         for i in range(len(self.bin_lines)):

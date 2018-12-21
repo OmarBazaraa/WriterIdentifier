@@ -41,3 +41,10 @@ def copy_file(src: str, dst: str) -> None:
         os.makedirs(directory)
 
     shutil.copyfile(src, dst)
+
+
+def chunk(l: list, n: int) -> list:
+    ret = []
+    for i in range(0, len(l), n):
+        ret.append(l[i:i + n])
+    return ret
