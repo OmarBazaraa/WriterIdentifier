@@ -1,6 +1,5 @@
 import time
 import random
-import shutil
 
 from src.data.test_generator import TestGenerator
 from src.pre_processing.pre_processor import PreProcessor
@@ -57,6 +56,7 @@ def run():
             try:
                 r = process_test_iteration(data_path + d + '/')
             except:
+                print('    >> Error')
                 r = random.randint(1, 3)
 
             # Finish timer of test iteration
@@ -167,7 +167,7 @@ def save_wrong_iterations():
         k = len(dirs)
         break
 
-    # Print wrong classifications
+    # Save wrong classifications
     for i in range(len(predicted_res)):
         if predicted_res[i] == expected_res[i]:
             continue
@@ -208,5 +208,5 @@ print('Classification accuracy: %d/%d' % calculate_accuracy())
 print('-------------------------------')
 print()
 # TODO: to be removed before discussion
-save_wrong_iterations()
+# save_wrong_iterations()
 

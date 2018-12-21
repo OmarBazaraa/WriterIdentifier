@@ -1,7 +1,10 @@
+import math
 import time
 import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
+
+from skimage import feature
 
 from src.utils.utils import *
 from src.segmentation.line_segmentor import LineSegmentor
@@ -63,8 +66,9 @@ class FeatureExtractor:
         lbp = np.zeros((height, width), dtype=np.uint8)
 
         # Directions
-        dx = [0, 1, 1, 1, 0, -1, -1, -1]
-        dy = [1, 1, 0, -1, -1, -1, 0, 1]
+        v = 3
+        dx = [0, v, v, v, 0, -v, -v, -v]
+        dy = [v, v, 0, -v, -v, -v, 0, v]
 
         # Loop over the 8 neighbors
         for i in range(8):

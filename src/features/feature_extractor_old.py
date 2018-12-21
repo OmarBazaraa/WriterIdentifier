@@ -2,7 +2,9 @@ import time
 import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
+
 from skimage.morphology import skeletonize
+from skimage import feature
 
 from src.utils.utils import *
 from src.utils.constants import *
@@ -199,6 +201,50 @@ class FeatureExtractor:
                 hist[v] += 1
 
         return hist
+
+    #####################################################################
+
+    def glcm_properties(self):
+        prop = []
+
+        for i in range(len(self.gray_lines)):
+            p = FeatureExtractor.get_glcm_properties(self.gray_lines[i])
+
+            if len(prop) == 0:
+                prop = p
+            else:
+                prop = np.add(prop, p)
+
+        prop /= len(self.gray_lines)
+
+        return prop
+
+    @staticmethod
+    def get_glcm_properties(img):
+        prop = []
+
+        # Set distances and angles for GLCM
+        distances = [5]
+        angles = [0]
+
+        # Calculate the GLCM of the handwritten paragraph
+        glcm = feature.greycomatrix(img, distances, angles, levels=256, symmetric=True, normed=True)
+
+        # Get some GLCM properties
+        f = feature.greycoprops(glcm, prop='contrast')
+        prop.extend(f.ravel())
+        f = feature.greycoprops(glcm, prop='dissimilarity')
+        prop.extend(f.ravel())
+        f = feature.greycoprops(glcm, prop='homogeneity')
+        prop.extend(f.ravel())
+        f = feature.greycoprops(glcm, prop='ASM')
+        prop.extend(f.ravel())
+        f = feature.greycoprops(glcm, prop='energy')
+        prop.extend(f.ravel())
+        f = feature.greycoprops(glcm, prop='correlation')
+        prop.extend(f.ravel())
+
+        return prop
 
     #####################################################################
 
