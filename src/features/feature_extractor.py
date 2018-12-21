@@ -44,6 +44,8 @@ class FeatureExtractor:
         return self.features
 
     def lbp_histogram(self):
+        # hist = FeatureExtractor.get_lbp_histogram(self.gray_img, self.bin_img)
+
         hist = np.zeros(256)
 
         for i in range(len(self.bin_lines)):

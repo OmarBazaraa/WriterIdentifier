@@ -1,10 +1,12 @@
 import time
 import random
 
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+
 from src.data.test_generator import TestGenerator
 from src.pre_processing.pre_processor import PreProcessor
 from src.features.feature_extractor import FeatureExtractor
-from src.models.svm_classifier import Classifier
 from src.utils.utils import *
 from src.utils.constants import *
 
@@ -91,8 +93,12 @@ def process_test_iteration(path):
             labels.extend(y)
 
     # Train the SVM model
-    classifier = Classifier('svm', features, labels)
-    classifier.train()
+    classifier = SVC(C=5.0, gamma='auto')
+    classifier.fit(features, labels)
+
+    # Train the KNN model
+    # classifier = KNeighborsClassifier(1)
+    # classifier.fit(features, labels)
 
     # Loop over test images in the current test iteration
     # Should be 1 test image
@@ -194,7 +200,7 @@ def save_wrong_iterations():
 #
 if GENERATE_TEST_ITERATIONS:
     gen = TestGenerator()
-    gen.generate(data_path, 50, 3, 2)
+    gen.generate(data_path, 200, 3, 2)
 
 #
 # Main
@@ -208,5 +214,4 @@ print('Classification accuracy: %d/%d' % calculate_accuracy())
 print('-------------------------------')
 print()
 # TODO: to be removed before discussion
-save_wrong_iterations()
-
+# save_wrong_iterations()
