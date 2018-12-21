@@ -1,5 +1,6 @@
 import time
 import random
+import shutil
 
 from src.data.test_generator import TestGenerator
 from src.pre_processing.pre_processor import PreProcessor
@@ -13,6 +14,7 @@ from src.utils.constants import *
 # Paths
 #
 data_path = '../data/data/'
+wrong_data_path = '../data/wrong/'
 results_path = '../data/results.txt'
 time_path = '../data/time.txt'
 expected_results_path = data_path + 'output.txt'
@@ -79,8 +81,8 @@ def run():
 def process_test_iteration(path):
     features, labels, r = [], [], 0
 
-    # Loop over every writer in the current test iteration.
-    # Should be 3 writers.
+    # Loop over every writer in the current test iteration
+    # Should be 3 writers
     for root, dirs, files in os.walk(path):
         for d in dirs:
             print('    Processing writer', d, '...')
@@ -92,13 +94,12 @@ def process_test_iteration(path):
     classifier = Classifier('svm', features, labels)
     classifier.train()
 
-    # Loop over test images in the current test iteration.
-    # Should be 1 test image.
+    # Loop over test images in the current test iteration
+    # Should be 1 test image
     for root, dirs, files in os.walk(path):
         for filename in files:
             f = get_writing_features(path + filename)
             r = classifier.predict([f])[0]
-            print()
             print('    Classifying test image \'%s\' as writer %d' % (path + filename, r))
             break
         break
@@ -142,18 +143,50 @@ def calculate_accuracy():
         if predicted_res[i] == expected_res[i]:
             cnt += 1
 
-    # Print accuracy
-    print('Classification accuracy: %d/%d' % (cnt, len(predicted_res)))
-    print('-------------------------------')
-    print()
+    # Return accuracy
+    return cnt, len(predicted_res)
+
+
+def save_wrong_iterations():
+    # Read results
+    with open(results_path) as f:
+        predicted_res = f.read().splitlines()
+    with open(expected_results_path) as f:
+        expected_res = f.read().splitlines()
+
+    # Create wrong classified data directory
+    if not os.path.exists(wrong_data_path):
+        os.makedirs(wrong_data_path)
+
+    # Open expected output text file
+    file = open(wrong_data_path + 'output.txt', 'a+')
+
+    # Get number of previously wrong classified iterations
+    k = 0
+    for root, dirs, files in os.walk(wrong_data_path):
+        k = len(dirs)
+        break
 
     # Print wrong classifications
     for i in range(len(predicted_res)):
-        if predicted_res[i] != expected_res[i]:
-            print('Wrong classification in iteration: %s (output: %s, expected: %s)' %
-                  (format(i, '03d'), predicted_res[i], expected_res[i]))
+        if predicted_res[i] == expected_res[i]:
+            continue
 
-    return cnt / len(predicted_res)
+        # Copy
+        src_path = data_path + format(i, '03d') + '/'
+        dst_path = wrong_data_path + format(k, '03d') + '/'
+        shutil.copytree(src_path, dst_path)
+        k += 1
+
+        # Write expected result
+        file.write(expected_res[i] + '\n')
+
+        # Log
+        print('Wrong classification in iteration: %s (output: %s, expected: %s)' %
+              (format(i, '03d'), predicted_res[i], expected_res[i]))
+
+    # Close file
+    file.close()
 
 
 #
@@ -161,7 +194,7 @@ def calculate_accuracy():
 #
 if GENERATE_TEST_ITERATIONS:
     gen = TestGenerator()
-    gen.generate(data_path, 200, 3, 2)
+    gen.generate(data_path, 50, 3, 2)
 
 #
 # Main
@@ -170,5 +203,10 @@ run()
 print('-------------------------------')
 print('Total elapsed time: %.2f seconds' % total_time)
 print('Feature extraction elapsed time: %.2f seconds' % feature_extraction_time)
-acc = calculate_accuracy() * 100    # TODO: to be removed before discussion
+# TODO: to be removed before discussion
+print('Classification accuracy: %d/%d' % calculate_accuracy())
+print('-------------------------------')
+print()
+# TODO: to be removed before discussion
+save_wrong_iterations()
 
