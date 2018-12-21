@@ -64,7 +64,7 @@ def run():
 
             # Write the results in files
             results_file.write(str(r) + '\n')
-            time_file.write(str(t) + '\n')
+            time_file.write(format(t, '0.02f') + '\n')
 
             print('Finish test iteration %s in %.02f seconds' % (d, t))
             print()
@@ -208,5 +208,5 @@ print('Classification accuracy: %d/%d' % calculate_accuracy())
 print('-------------------------------')
 print()
 # TODO: to be removed before discussion
-# save_wrong_iterations()
+save_wrong_iterations()
 
