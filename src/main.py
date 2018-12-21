@@ -137,7 +137,7 @@ def get_writing_features(image_path):
     # Feature extraction
     t = time.time()
     f = FeatureExtractor(gray_lines, bin_lines).extract()
-    feature_extraction_time += t
+    feature_extraction_time += (time.time() - t)
     return f
 
 
