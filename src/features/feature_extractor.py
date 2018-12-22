@@ -62,6 +62,8 @@ class FeatureExtractor:
         v = 3
         dx = [0, v, v, v, 0, -v, -v, -v]
         dy = [v, v, 0, -v, -v, -v, 0, v]
+        # dx = [0, 2, 3, 2, 0, -2, -3, -2]
+        # dy = [3, 2, 0, -2, -3, -2, 0, 2]
 
         # Loop over the 8 neighbors
         for i in range(8):

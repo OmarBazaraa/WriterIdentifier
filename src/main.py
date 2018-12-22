@@ -89,17 +89,17 @@ def process_test_iteration(path):
     for root, dirs, files in os.walk(path):
         for d in dirs:
             print('    Processing writer', d, '...')
-            x, y = process_writer(path + d + '/', int(d))
+            x, y = process_writer_old(path + d + '/', int(d))
             features.extend(x)
             labels.extend(y)
 
     # Train the SVM model
-    classifier = SVC(C=5.0, gamma='auto')
-    classifier.fit(features, labels)
+    # classifier = SVC(C=5.0, gamma='auto')
+    # classifier.fit(features, labels)
 
     # Train the KNN model
-    # classifier = KNeighborsClassifier(1)
-    # classifier.fit(features, labels)
+    classifier = KNeighborsClassifier(1)
+    classifier.fit(features, labels)
 
     # Loop over test images in the current test iteration
     # Should be 1 test image
@@ -116,6 +116,36 @@ def process_test_iteration(path):
 
 
 def process_writer(path, writer_id):
+    global feature_extraction_time
+
+    x, y = [], []
+    total_gray_lines, total_bin_lines = [], []
+
+    # Read and append all lines of the writer
+    for root, dirs, files in os.walk(path):
+        for filename in files:
+            gray_img = cv.imread(path + filename, cv.IMREAD_GRAYSCALE)
+            gray_img, bin_img = PreProcessor.process(gray_img)
+            gray_lines, bin_lines = LineSegmentor(gray_img, bin_img).segment()
+            total_gray_lines.extend(gray_lines)
+            total_bin_lines.extend(bin_lines)
+
+    # Split lines into chunks
+    gray_lines_chunks = chunk(total_gray_lines, 5)
+    bin_lines_chunks = chunk(total_bin_lines, 5)
+
+    # Extract features of every chuck separately
+    for i in range(len(gray_lines_chunks)):
+        t = time.time()
+        f = FeatureExtractor(gray_lines_chunks[i], bin_lines_chunks[i]).extract()
+        feature_extraction_time += (time.time() - t)
+        x.append(f)
+        y.append(writer_id)
+
+    return x, y
+
+
+def process_writer_old(path, writer_id):
     x, y = [], []
 
     for root, dirs, files in os.walk(path):
@@ -129,7 +159,7 @@ def process_writer(path, writer_id):
 def get_writing_features(image_path):
     global feature_extraction_time
 
-    # Preprocessing
+    # Pre-processing
     gray_img = cv.imread(image_path, cv.IMREAD_GRAYSCALE)
     gray_img, bin_img = PreProcessor.process(gray_img)
     gray_lines, bin_lines = LineSegmentor(gray_img, bin_img).segment()
@@ -156,6 +186,23 @@ def calculate_accuracy():
 
     # Return accuracy
     return cnt, len(predicted_res)
+
+
+def print_wrong_iterations():
+    # Read results
+    with open(results_path) as f:
+        predicted_res = f.read().splitlines()
+    with open(expected_results_path) as f:
+        expected_res = f.read().splitlines()
+
+    # Print wrong classifications
+    for i in range(len(predicted_res)):
+        if predicted_res[i] == expected_res[i]:
+            continue
+
+        # Log
+        print('Wrong classification in iteration: %s (output: %s, expected: %s)' %
+              (format(i, '03d'), predicted_res[i], expected_res[i]))
 
 
 def save_wrong_iterations():
@@ -192,10 +239,6 @@ def save_wrong_iterations():
         # Write expected result
         file.write(expected_res[i] + '\n')
 
-        # Log
-        print('Wrong classification in iteration: %s (output: %s, expected: %s)' %
-              (format(i, '03d'), predicted_res[i], expected_res[i]))
-
     # Close file
     file.close()
 
@@ -205,7 +248,8 @@ def save_wrong_iterations():
 #
 if GENERATE_TEST_ITERATIONS:
     gen = TestGenerator()
-    gen.generate(data_path, 200, 3, 2)
+    gen.generate(data_path, 50, 3, 2)
+
 
 #
 # Main
@@ -219,4 +263,5 @@ print('Classification accuracy: %d/%d' % calculate_accuracy())
 print('-------------------------------')
 print()
 # TODO: to be removed before discussion
-# save_wrong_iterations()
+print_wrong_iterations()
+save_wrong_iterations()
