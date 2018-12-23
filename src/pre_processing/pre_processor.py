@@ -16,6 +16,13 @@ class PreProcessor:
         :return:            pre-processed gray and binary images of the handwritten paragraph.
         """
 
+        # Resize image.
+        # height, width = gray_img.shape
+        # limit = 1000
+        # if height > limit:
+        #     ratio = limit / height
+        #     gray_img = cv.resize(gray_img, (0, 0), fx=ratio, fy=ratio)
+
         # Reduce image noise.
         gray_img = cv.GaussianBlur(gray_img, (5, 5), 0)
 

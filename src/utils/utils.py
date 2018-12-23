@@ -3,6 +3,8 @@ import shutil
 import cv2 as cv
 import numpy as np
 
+from src.utils.constants import *
+
 
 def display_image(name: str, img: np.ndarray, wait: bool = True) -> None:
     """
@@ -48,3 +50,74 @@ def chunk(l: list, n: int) -> list:
     for i in range(0, len(l), n):
         ret.append(l[i:i + n])
     return ret
+
+
+def calculate_accuracy():
+    # Read results
+    with open(RESULTS_PATH) as f:
+        predicted_res = f.read().splitlines()
+    with open(EXPECTED_RESULTS_PATH) as f:
+        expected_res = f.read().splitlines()
+
+    # Calculate accuracy
+    cnt = 0
+    for i in range(len(predicted_res)):
+        if predicted_res[i] == expected_res[i]:
+            cnt += 1
+
+    # Return accuracy
+    return cnt, len(predicted_res)
+
+
+def print_wrong_test_cases():
+    # Read results
+    with open(RESULTS_PATH) as f:
+        predicted_res = f.read().splitlines()
+    with open(EXPECTED_RESULTS_PATH) as f:
+        expected_res = f.read().splitlines()
+
+    # Print wrong classifications
+    for i in range(len(predicted_res)):
+        if predicted_res[i] == expected_res[i]:
+            continue
+
+        print('Wrong classification in iteration: %s (output: %s, expected: %s)' %
+              (format(i, '03d'), predicted_res[i], expected_res[i]))
+
+
+def save_wrong_test_cases():
+    # Read results
+    with open(RESULTS_PATH) as f:
+        predicted_res = f.read().splitlines()
+    with open(EXPECTED_RESULTS_PATH) as f:
+        expected_res = f.read().splitlines()
+
+    # Create wrong classified data directory
+    if not os.path.exists(WRONG_DATA_PATH):
+        os.makedirs(WRONG_DATA_PATH)
+
+    # Open expected output text file
+    file = open(WRONG_DATA_PATH + 'output.txt', 'a+')
+
+    # Get number of previously wrong classified iterations
+    k = 0
+    for root, dirs, files in os.walk(WRONG_DATA_PATH):
+        k = len(dirs)
+        break
+
+    # Save wrong classifications
+    for i in range(len(predicted_res)):
+        if predicted_res[i] == expected_res[i]:
+            continue
+
+        # Copy
+        src_path = DATA_PATH + format(i, '03d') + '/'
+        dst_path = WRONG_DATA_PATH + format(k, '03d') + '/'
+        shutil.copytree(src_path, dst_path)
+        k += 1
+
+        # Write expected result
+        file.write(expected_res[i] + '\n')
+
+    # Close file
+    file.close()

@@ -1,3 +1,12 @@
+#
+# Paths
+#
+DATA_PATH = '../data/data/'
+RESULTS_PATH = '../data/results.txt'
+ELAPSED_TIME_PATH = '../data/time.txt'
+EXPECTED_RESULTS_PATH = DATA_PATH + 'output.txt'
+WRONG_DATA_PATH = '../data/wrong/'
+
 # Make it true to generate test iterations from IAM data set.
 GENERATE_TEST_ITERATIONS = False
 
