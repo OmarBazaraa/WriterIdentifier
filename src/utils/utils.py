@@ -69,6 +69,36 @@ def calculate_accuracy():
     return cnt, len(predicted_res)
 
 
+def calculate_avg_test_case_time():
+    with open(ELAPSED_TIME_PATH) as f:
+        times = f.read().splitlines()
+
+    total_time = 0
+    for i in range(len(times)):
+        total_time += float(times[i])
+
+    return total_time / len(times)
+
+
+def list_test_directory_content(directory, output_file):
+    file = open(output_file, 'w+')
+
+    def rec(path, ind=0):
+
+        for root, dirs, files in os.walk(path):
+            for d in dirs:
+                file.write((' ' * ind) + d + '/\n')
+                print((' ' * ind) + d + '/')
+                rec(path + d + '/', ind + 4)
+            for f in files:
+                file.write(' ' * ind + f + '\n')
+                print(' ' * ind + f)
+            break
+
+    rec(directory, 0)
+    file.close()
+
+
 def print_wrong_test_cases():
     # Read results
     with open(RESULTS_PATH) as f:
