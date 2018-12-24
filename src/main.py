@@ -215,7 +215,7 @@ def get_writing_features(image_path):
 
 if GENERATE_TEST_ITERATIONS:
     gen = TestGenerator()
-    gen.generate(DATA_PATH, 50, 3, 2)
+    gen.generate(DATA_PATH, 100, 3, 2)
 
 # =====================================================================
 #
@@ -227,6 +227,7 @@ run()
 print('-------------------------------')
 print('Total elapsed time: %.2f seconds' % total_time)
 # TODO: to be removed before discussion
+print('Average test case time: %.2f seconds' % calculate_avg_test_case_time())
 print('Classification accuracy: %d/%d' % calculate_accuracy())
 print('-------------------------------')
 print()
