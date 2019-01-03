@@ -68,7 +68,7 @@ testcases
 ```
 
 #### Notes
-* No specific format is required for naming the folders inside '/data/testcases/'.
+* No specific format is required for naming the folders inside `/data/testcases/`.
 * Images could be in any format (e.g. png, jpg, ..etc).
 * No limitations on the number of test cases, writers, images per writer, or test images.
 * The above test case folder structure should be followed for the system to run correctly.
