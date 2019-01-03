@@ -30,17 +30,17 @@ More information about the system architecture and pipeline is available [here](
    python ./src/main.py
    ```
 
-## Test cases format
-Each test case consists of two parts: training data and test data.
+## Test cases folder structure
+Each test case consists of two parts:
 
-#### 1. Training data
-Training images of a specific writer should be grouped together in folder named after that writer.
+**1. Training data**  
+     Training images of a specific writer should be grouped together in folder named after that writer.
 
-#### 2. Test data
-Test images (those that our system is required to identify) should be in the root of each test case folder.
+**2. Test data**  
+     Test images (those that our system is required to identify) should be in the root of each test case folder.
 
 #### Example
-Test cases format example
+Test cases format example.
 
 ```
 testcases
