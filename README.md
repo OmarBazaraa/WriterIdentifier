@@ -73,7 +73,7 @@ testcases
 * No limitations on the number of test cases, writers, images per writer, or test images.
 * The above test case folder structure should be followed for the system to run correctly.
 
-# Database used
+## Database used
 IAM offline handwriting database.
 
 > U. Marti and H. Bunke.
