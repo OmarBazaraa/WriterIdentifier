@@ -82,7 +82,7 @@ def process_test_case(path):
     for root, dirs, files in os.walk(path):
         for d in dirs:
             print('    Processing writer', d, '...')
-            x, y = get_writer_features(path + d + '/', int(d))
+            x, y = get_writer_features(path + d + '/', d)
             features.extend(x)
             labels.extend(y)
 
@@ -102,7 +102,7 @@ def process_test_case(path):
             p = np.sum(p, axis=0)
             r = classifier.classes_[np.argmax(p)]
 
-            print('    Classifying test image \'%s\' as writer %d' % (path + filename, r))
+            print('    Classifying test image \'%s\' as writer \'%s\'' % (path + filename, r))
         break
 
     # Return classification
@@ -164,7 +164,7 @@ def process_test_case_old(path):
     for root, dirs, files in os.walk(path):
         for d in dirs:
             print('    Processing writer', d, '...')
-            x, y = process_writer_old(path + d + '/', int(d))
+            x, y = process_writer_old(path + d + '/', d)
             features.extend(x)
             labels.extend(y)
 
@@ -178,7 +178,7 @@ def process_test_case_old(path):
         for filename in files:
             f = get_writing_features(path + filename)
             r = classifier.predict([f])[0]
-            print('    Classifying test image \'%s\' as writer %d' % (path + filename, r))
+            print('    Classifying test image \'%s\' as writer \'%s\'' % (path + filename, r))
             break
         break
 
