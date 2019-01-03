@@ -8,6 +8,8 @@ Writer identification is a sub-field of handwriting analysis that generally refe
 
 In this repository, we present a writer identification system, where the system is required to identify the writer identity of a handwritten paragraph after getting trained upon handwriting of some different writers.
 
+## Brief description
+
 In our work, we used texture-based approach for writer identification, we used the potential texture descriptor, namely Local Binary Pattern **(LBP)**, and we used Support Vector Machine **(SVM)** as a classifier to distinguish between feature vectors of different writers. We tested our system on _IAM handwritten dataset_, and we were able to achieve correct identification accuracy of about _**99%**_.
 
 More information about the system architecture and pipeline is available [here](https://github.com/OmarBazaraa/WriterIdentifier/blob/master/docs/description.pdf).
@@ -15,18 +17,61 @@ More information about the system architecture and pipeline is available [here](
 ## How to use
 1. Install Python 3 interpreter.
 2. Clone this repository.
-```Console
-git clone https://github.com/OmarBazaraa/WriterIdentifier.git
-```
+   ```Console
+   git clone https://github.com/OmarBazaraa/WriterIdentifier.git
+   ```
 3. Install project dependencies.
-```Console
-pip install -r requirements.txt
-```
+   ```Console
+   pip install -r requirements.txt
+   ```
 4. Add test cases into `/data/testcases/` folder.
 4. Run the project.
-```Console
-python ./src/main.py
+   ```Console
+   python ./src/main.py
+   ```
+
+## Test cases format
+Each test case consists of two parts: training data and test data.
+
+#### 1. Training data
+Training images of a specific writer should be grouped together in folder named after that writer.
+
+#### 2. Test data
+Test images (those that our system is required to identify) should be in the root of each test case folder.
+
+#### Example
+Test cases format example
+
 ```
+testcases
+├── 001
+|   ├── writer1
+|   |   ├── training_image1.png
+|   |   ├── training_image2.png
+|   |   └── ...
+|   |
+|   ├── writer2
+|   |   ├── training_image1.png
+|   |   ├── training_image2.png
+|   |   └── ...
+|   |
+|   ├── ...
+|   |
+|   ├── test_image1.png
+|   ├── test_image1.png
+|   └── ...
+|
+├── 002
+|   └── ...
+|
+└── ...
+```
+
+#### Notes
+* No specific format is required for naming the folders inside '/data/testcases/'.
+* Images could be in any format (e.g. png, jpg, ..etc).
+* No limitations on the number of test cases, writers, images per writer, or test images.
+* The above test case folder structure should be followed for the system to run correctly.
 
 # Database used
 IAM offline handwriting database.
