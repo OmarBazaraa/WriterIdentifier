@@ -123,15 +123,15 @@ def save_wrong_test_cases():
         expected_res = f.read().splitlines()
 
     # Create wrong classified data directory
-    if not os.path.exists(WRONG_DATA_PATH):
-        os.makedirs(WRONG_DATA_PATH)
+    if not os.path.exists(WRONG_CASES_PATH):
+        os.makedirs(WRONG_CASES_PATH)
 
     # Open expected output text file
-    file = open(WRONG_DATA_PATH + 'output.txt', 'a+')
+    file = open(WRONG_CASES_PATH + 'output.txt', 'a+')
 
     # Get number of previously wrong classified iterations
     k = 0
-    for root, dirs, files in os.walk(WRONG_DATA_PATH):
+    for root, dirs, files in os.walk(WRONG_CASES_PATH):
         k = len(dirs)
         break
 
@@ -141,8 +141,8 @@ def save_wrong_test_cases():
             continue
 
         # Copy
-        src_path = DATA_PATH + format(i, '03d') + '/'
-        dst_path = WRONG_DATA_PATH + format(k, '03d') + '/'
+        src_path = TEST_CASES_PATH + format(i, '03d') + '/'
+        dst_path = WRONG_CASES_PATH + format(k, '03d') + '/'
         shutil.copytree(src_path, dst_path)
         k += 1
 

@@ -2,9 +2,10 @@ import random
 
 from src.utils.utils import *
 
+
 class TestGenerator:
-    dataset_path = '../data/dataset/forms/'
-    dataset_meta_file = '../data/dataset/meta.txt'
+    dataset_path = DATASET_PATH + 'forms/'
+    dataset_meta_file = DATASET_PATH + 'meta.txt'
 
     writers = {}
     writers_ids = []
@@ -63,7 +64,7 @@ class TestGenerator:
         os.makedirs(path)
 
         # Open output file to write the expected results of the test iterations
-        self.output_file = open(path + 'output.txt', 'w')
+        self.output_file = open(path + EXPECTED_RESULTS_FILENAME, 'w')
 
         # Generate the n test iterations
         for i in range(n):

@@ -42,7 +42,7 @@ def run():
     time_file = open(ELAPSED_TIME_PATH, 'w')
 
     # Iterate on every test case
-    for root, dirs, files in os.walk(DATA_PATH):
+    for root, dirs, files in os.walk(TEST_CASES_PATH):
         for d in dirs:
             print('Running test iteration', d, '...')
 
@@ -51,7 +51,7 @@ def run():
 
             # Solve test iteration
             try:
-                r = process_test_case(DATA_PATH + d + '/')
+                r = process_test_case(TEST_CASES_PATH + d + '/')
             except:
                 print('    >> Error')
                 r = random.randint(1, 3)
@@ -215,7 +215,7 @@ def get_writing_features(image_path):
 
 if GENERATE_TEST_ITERATIONS:
     gen = TestGenerator()
-    gen.generate(DATA_PATH, 100, 3, 2)
+    gen.generate(TEST_CASES_PATH, 10, 3, 2)
 
 # =====================================================================
 #
@@ -226,11 +226,10 @@ if GENERATE_TEST_ITERATIONS:
 run()
 print('-------------------------------')
 print('Total elapsed time: %.2f seconds' % total_time)
-# TODO: to be removed before discussion
 print('Average test case time: %.2f seconds' % calculate_avg_test_case_time())
 print('Classification accuracy: %d/%d' % calculate_accuracy())
 print('-------------------------------')
 print()
-# TODO: to be removed before discussion
-print_wrong_test_cases()
+
+# print_wrong_test_cases()
 # save_wrong_test_cases()
