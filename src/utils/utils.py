@@ -73,6 +73,9 @@ def calculate_avg_test_case_time():
     with open(ELAPSED_TIME_PATH) as f:
         times = f.read().splitlines()
 
+    if len(times) == 0:
+        return 0
+
     total_time = 0
     for i in range(len(times)):
         total_time += float(times[i])
