@@ -6,9 +6,9 @@ import matplotlib.pyplot as plt
 from skimage.morphology import skeletonize
 from skimage import feature
 
-from src.utils.utils import *
-from src.utils.constants import *
-from src.segmentation.line_segmentor import LineSegmentor
+from utils.utils import *
+from utils.constants import *
+from segmentation.line_segmentor import LineSegmentor
 
 
 class FeatureExtractor:

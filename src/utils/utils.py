@@ -3,7 +3,7 @@ import shutil
 import cv2 as cv
 import numpy as np
 
-from src.utils.constants import *
+from utils.constants import *
 
 
 def display_image(name: str, img: np.ndarray, wait: bool = True) -> None:
@@ -53,8 +53,13 @@ def chunk(l: list, n: int) -> list:
 
 
 def calculate_accuracy():
+    # Check if the expected results exists
+    if not os.path.exists(EXPECTED_RESULTS_PATH):
+        print('>> Please add \'%s\' with the expected results of all the test images' % EXPECTED_RESULTS_PATH)
+        return -1, 0
+
     # Read results
-    with open(RESULTS_PATH) as f:
+    with open(PREDICTED_RESULTS_PATH) as f:
         predicted_res = f.read().splitlines()
     with open(EXPECTED_RESULTS_PATH) as f:
         expected_res = f.read().splitlines()
@@ -67,20 +72,6 @@ def calculate_accuracy():
 
     # Return accuracy
     return cnt, len(predicted_res)
-
-
-def calculate_avg_test_case_time():
-    with open(ELAPSED_TIME_PATH) as f:
-        times = f.read().splitlines()
-
-    if len(times) == 0:
-        return 0
-
-    total_time = 0
-    for i in range(len(times)):
-        total_time += float(times[i])
-
-    return total_time / len(times)
 
 
 def list_test_directory_content(directory, output_file):
@@ -102,9 +93,14 @@ def list_test_directory_content(directory, output_file):
     file.close()
 
 
-def print_wrong_test_cases():
+def print_wrong_testcases():
+    # Check if the expected results exists
+    if not os.path.exists(EXPECTED_RESULTS_PATH):
+        print('Please add \'%s\' with the expected results of all the test images' % EXPECTED_RESULTS_PATH)
+        return
+
     # Read results
-    with open(RESULTS_PATH) as f:
+    with open(PREDICTED_RESULTS_PATH) as f:
         predicted_res = f.read().splitlines()
     with open(EXPECTED_RESULTS_PATH) as f:
         expected_res = f.read().splitlines()
@@ -118,9 +114,14 @@ def print_wrong_test_cases():
               (format(i, '03d'), predicted_res[i], expected_res[i]))
 
 
-def save_wrong_test_cases():
+def save_wrong_testcases():
+    # Check if the expected results exists
+    if not os.path.exists(EXPECTED_RESULTS_PATH):
+        print('Please add \'%s\' with the expected results of all the test images' % EXPECTED_RESULTS_PATH)
+        return
+
     # Read results
-    with open(RESULTS_PATH) as f:
+    with open(PREDICTED_RESULTS_PATH) as f:
         predicted_res = f.read().splitlines()
     with open(EXPECTED_RESULTS_PATH) as f:
         expected_res = f.read().splitlines()
@@ -144,7 +145,7 @@ def save_wrong_test_cases():
             continue
 
         # Copy
-        src_path = TEST_CASES_PATH + format(i, '03d') + '/'
+        src_path = TESTCASES_PATH + format(i, '03d') + '/'
         dst_path = WRONG_CASES_PATH + format(k, '03d') + '/'
         shutil.copytree(src_path, dst_path)
         k += 1

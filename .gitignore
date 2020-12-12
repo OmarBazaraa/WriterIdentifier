@@ -1,7 +1,27 @@
+#
+# IDEs
+#
+.vs
+.vscode
 .idea
+
+#
+# Python
+#
+.env
+.venv
+.pyenv
 __pycache__/
-.DS_Store
+
+#
+# Resources
+#
 *.png
 *.jpg
 *.xml
 *.txt
+
+#
+# Others
+#
+.DS_Store

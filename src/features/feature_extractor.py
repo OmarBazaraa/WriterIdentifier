@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 from skimage import feature
 
-from src.utils.utils import *
+from utils.utils import *
 
 
 class FeatureExtractor:

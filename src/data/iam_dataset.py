@@ -1,8 +1,8 @@
 import os
 import xml.etree.ElementTree as ET
 
-from src.utils.utils import *
-from src.pre_processing.pre_processor import PreProcessor
+from utils.utils import *
+from pre_processing.pre_processor import PreProcessor
 
 
 class IAMLoader:

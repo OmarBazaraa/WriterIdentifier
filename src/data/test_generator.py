@@ -1,6 +1,6 @@
 import random
 
-from src.utils.utils import *
+from utils.utils import *
 
 
 class TestGenerator:
@@ -127,4 +127,3 @@ class TestGenerator:
 
         # Write expected writer
         self.output_file.write(str(used_writers[w]) + '\n')
-

@@ -2,8 +2,8 @@ import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
 
-from src.utils.utils import *
-from src.utils.constants import *
+from utils.utils import *
+from utils.constants import *
 
 
 class PreProcessor:
@@ -55,7 +55,7 @@ class PreProcessor:
         height, width = gray_img.shape
 
         # Find all contours in the page.
-        _, contours, hierarchy = cv.findContours(bin_img, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)
+        contours, hierarchy = cv.findContours(bin_img, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)
 
         # Minimum contour width to be considered as the black separator line.
         threshold_width = 1000

@@ -1,27 +1,24 @@
 import time
 import random
+import numpy as np
 
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 
-from src.data.test_generator import TestGenerator
-from src.pre_processing.pre_processor import PreProcessor
-from src.segmentation.line_segmentor import LineSegmentor
-from src.features.feature_extractor import FeatureExtractor
-from src.utils.utils import *
-from src.utils.constants import *
+from data.test_generator import TestGenerator
+from pre_processing.pre_processor import PreProcessor
+from segmentation.line_segmentor import LineSegmentor
+from features.feature_extractor import FeatureExtractor
+from utils.utils import *
+from utils.constants import *
 
 
 #
-# Files
+# Variables
 #
-results_file = None
-time_file = None
-
-#
-# Timers
-#
+result_file = None
 total_time = 0.0
+testcase_time = []
 
 # =====================================================================
 #
@@ -32,56 +29,46 @@ total_time = 0.0
 
 def run():
     # Set global variables
-    global results_file, time_file, total_time
+    global result_file, total_time, testcase_time
 
     # Start timer
     start = time.time()
 
-    # Open results files
-    results_file = open(RESULTS_PATH, 'w')
-    time_file = open(ELAPSED_TIME_PATH, 'w')
+    # Open files
+    result_file = open(PREDICTED_RESULTS_PATH, 'w')
 
-    # Iterate on every test case
-    for root, dirs, files in os.walk(TEST_CASES_PATH):
+    # Iterate on every testcase
+    for root, dirs, files in os.walk(TESTCASES_PATH):
         for d in dirs:
-            print('Running test iteration', d, '...')
+            print('Running test iteration \'%s\'...' % d)
 
             # Start timer of test iteration
             t = time.time()
 
             # Solve test iteration
-            try:
-                r = process_test_case(TEST_CASES_PATH + d + '/')
-            except:
-                print('    >> Error')
-                r = random.randint(1, 3)
+            process_testcase(TESTCASES_PATH + d + '/')
 
             # Finish timer of test iteration
             t = (time.time() - t)
+            testcase_time.append(t)
 
-            # Write the results in files
-            results_file.write(str(r) + '\n')
-            time_file.write(format(t, '0.02f') + '\n')
-
-            print('Finish test iteration %s in %.02f seconds\n' % (d, t))
+            print('Finish test iteration \'%s\' in %.02f seconds\n' % (d, t))
         break
 
     # Close files
-    results_file.close()
-    time_file.close()
+    result_file.close()
 
     # End timer
     total_time = (time.time() - start)
 
 
-def process_test_case(path):
-    features, labels, r = [], [], 0
+def process_testcase(path):
+    features, labels = [], []
 
     # Loop over every writer in the current test iteration
-    # Should be 3 writers
     for root, dirs, files in os.walk(path):
         for d in dirs:
-            print('    Processing writer', d, '...')
+            print('    Processing writer \'%s\'...' % d)
             x, y = get_writer_features(path + d + '/', d)
             features.extend(x)
             labels.extend(y)
@@ -91,10 +78,9 @@ def process_test_case(path):
     classifier.fit(features, labels)
 
     # Loop over test images in the current test iteration
-    # Should be 1 test image
     for root, dirs, files in os.walk(path):
         for filename in files:
-            # Extract the features of the text image
+            # Extract the features of the test image
             x = get_features(path + filename)
 
             # Get the most likely writer
@@ -102,11 +88,11 @@ def process_test_case(path):
             p = np.sum(p, axis=0)
             r = classifier.classes_[np.argmax(p)]
 
+            # Write result
+            result_file.write(str(r) + '\n')
+
             print('    Classifying test image \'%s\' as writer \'%s\'' % (path + filename, r))
         break
-
-    # Return classification
-    return r
 
 
 def get_writer_features(path, writer_id):
@@ -156,10 +142,10 @@ def get_features(path):
 # =====================================================================
 
 
-def process_test_case_old(path):
+def process_testcase_old(path):
     features, labels, r = [], [], 0
 
-    # Loop over every writer in the current test case
+    # Loop over every writer in the current testcase
     # Should be 3 writers
     for root, dirs, files in os.walk(path):
         for d in dirs:
@@ -215,7 +201,7 @@ def get_writing_features(image_path):
 
 if GENERATE_TEST_ITERATIONS:
     gen = TestGenerator()
-    gen.generate(TEST_CASES_PATH, 10, 3, 2)
+    gen.generate(TESTCASES_PATH, 10, 3, 2)
 
 # =====================================================================
 #
@@ -226,10 +212,11 @@ if GENERATE_TEST_ITERATIONS:
 run()
 print('-------------------------------')
 print('Total elapsed time: %.2f seconds' % total_time)
-print('Average test case time: %.2f seconds' % calculate_avg_test_case_time())
+print('Average testcase time: %.2f seconds' % np.average(testcase_time))
 print('Classification accuracy: %d/%d' % calculate_accuracy())
 print('-------------------------------')
 print()
 
-# print_wrong_test_cases()
-# save_wrong_test_cases()
+if DEBUG_SAVE_WRONG_TESTCASES:
+    print_wrong_testcases()
+    save_wrong_testcases()
